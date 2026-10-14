@@ -1,9 +1,11 @@
 package com.ksv.model;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Event {
     private int id;
+    private LocalDateTime startsAt;
     private String name;
     private StatusEvent status;
     private int maxMembers;
@@ -12,8 +14,9 @@ public class Event {
     public Event() {
     }
 
-    public Event(int id, String name, int maxMembers) {
+    public Event(int id, String name, LocalDateTime startsAt, int maxMembers) {
         this.id = id;
+        this.startsAt = startsAt;
         this.name = name;
         this.maxMembers = maxMembers;
     }

@@ -4,12 +4,18 @@ import com.ksv.model.Event;
 import com.ksv.model.MemberEvent;
 import com.ksv.model.StatusRegistration;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventService {
 
-    public void createEvent(){
+    private final List<Event> events = new ArrayList<>();
+
+    public void createEvent(int idEvent, String name, LocalDateTime startsAt, int maxMembers){
         //пока заглушка
+        Event event = new Event(idEvent, name, startsAt, maxMembers);
+        events.add(event);
         System.out.println("process create event");
     }
 

@@ -19,6 +19,7 @@ public class Event {
         this.startsAt = startsAt;
         this.name = name;
         this.maxMembers = maxMembers;
+        this.status = StatusEvent.ACTUAL;
     }
 
     public int getId() {
@@ -43,5 +44,17 @@ public class Event {
 
     public void setMembers(List<MemberEvent> members) {
         this.members = members;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", startsAt=" + startsAt +
+                ", name='" + name + '\'' +
+                ", status=" + status +
+                ", maxMembers=" + maxMembers +
+                ", members=" + members +
+                '}';
     }
 }

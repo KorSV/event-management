@@ -12,11 +12,10 @@ public class EventService {
 
     private final List<Event> events = new ArrayList<>();
 
-    public void createEvent(int idEvent, String name, LocalDateTime startsAt, int maxMembers){
-        //пока заглушка
+    public Event createEvent(int idEvent, String name, LocalDateTime startsAt, int maxMembers){
         Event event = new Event(idEvent, name, startsAt, maxMembers);
         events.add(event);
-        System.out.println("process create event");
+        return event;
     }
 
     public Event cancelEvent(){

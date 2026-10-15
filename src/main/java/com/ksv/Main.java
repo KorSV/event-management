@@ -7,7 +7,11 @@ import com.ksv.view.InputReader;
 
 public class Main {
     public static void main(String[] args) {
-        ConsoleApplication application = new ConsoleApplication(new EventView(new EventService(), new InputReader()));
+        InputReader inputReader = new InputReader();
+        EventService eventService = new EventService();
+        EventView eventView = new EventView(eventService, inputReader);
+
+        ConsoleApplication application = new ConsoleApplication(eventView, inputReader);
         application.run();
     }
 }

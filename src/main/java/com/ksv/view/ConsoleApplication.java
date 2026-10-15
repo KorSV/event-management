@@ -5,13 +5,13 @@ import java.util.Scanner;
 
 public class ConsoleApplication {
     private Menu menu;
-    private Scanner scanner;
+    private InputReader inputReader;
     private EventView eventView;
     private boolean running;
 
-    public ConsoleApplication(EventView eventView) {
+    public ConsoleApplication(EventView eventView, InputReader inputReader) {
         this.eventView = eventView;
-        this.scanner = new Scanner(System.in);
+        this.inputReader = inputReader;
         init();
     }
 
@@ -27,14 +27,7 @@ public class ConsoleApplication {
         this.running = true;
         while (running){
             menu.show();
-            try {
-                int choice = scanner.nextInt();
-                handleChoice(choice);
-            } catch (InputMismatchException e) {
-                System.out.println("Вы ввели некорректное значение. Введите номер из списка.");
-                scanner.nextLine();
-            }
-
+            handleChoice(inputReader.getInt("Выберите пункт меню: "));
         }
     }
 

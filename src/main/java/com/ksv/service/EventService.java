@@ -11,9 +11,10 @@ import java.util.List;
 public class EventService {
 
     private final List<Event> events = new ArrayList<>();
+    private int nextId = 1;
 
-    public Event createEvent(int idEvent, String name, LocalDateTime startsAt, int maxMembers){
-        Event event = new Event(idEvent, name, startsAt, maxMembers);
+    public Event createEvent(String name, LocalDateTime startsAt, int maxMembers){
+        Event event = new Event(nextId++, name, startsAt, maxMembers);
         events.add(event);
         return event;
     }

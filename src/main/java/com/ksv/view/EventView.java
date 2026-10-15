@@ -21,7 +21,6 @@ public class EventView {
     }
 
     public void createEventHandler(){
-        int idEvent = inputReader.getInt("Введите id мероприятия: ");
         String name = inputReader.getString("Введите имя мероприятия: ");
         int day = inputReader.getInt("Введите дату и время мероприятия: \nдень: ");
         int month = inputReader.getInt("месяц: ");
@@ -30,7 +29,7 @@ public class EventView {
         int minutes = inputReader.getInt("минуты: ");
         LocalDateTime startsAt = LocalDateTime.of(year, month, day, hours, minutes);
         int maxMembers = inputReader.getInt("Введите максимальное количество участников");
-        Event event = eventService.createEvent(idEvent, name, startsAt, maxMembers);
+        Event event = eventService.createEvent( name, startsAt, maxMembers);
         System.out.println("Мероприятие добавлено:" + event.toString());
 
     }

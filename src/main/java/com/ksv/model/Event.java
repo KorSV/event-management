@@ -1,6 +1,7 @@
 package com.ksv.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Event {
@@ -19,6 +20,7 @@ public class Event {
         this.startsAt = startsAt;
         this.name = name;
         this.maxMembers = maxMembers;
+        this.members = new ArrayList<>();
         this.status = StatusEvent.ACTUAL;
     }
 

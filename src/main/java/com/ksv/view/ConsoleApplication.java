@@ -1,8 +1,5 @@
 package com.ksv.view;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
 public class ConsoleApplication {
     private Menu menu;
     private InputReader inputReader;

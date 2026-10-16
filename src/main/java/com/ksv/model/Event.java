@@ -10,7 +10,7 @@ public class Event {
     private String name;
     private StatusEvent status;
     private int maxMembers;
-    private List<MemberEvent> members;
+    private List<User> members;
 
     public Event() {
     }
@@ -40,12 +40,28 @@ public class Event {
         this.name = name;
     }
 
-    public List<MemberEvent> getMembers() {
+    public List<User> getMembers() {
         return members;
     }
 
-    public void setMembers(List<MemberEvent> members) {
+    public void setMembers(List<User> members) {
         this.members = members;
+    }
+
+    public LocalDateTime getStartsAt() {
+        return startsAt;
+    }
+
+    public StatusEvent getStatus() {
+        return status;
+    }
+
+    public int getMaxMembers() {
+        return maxMembers;
+    }
+
+    public void setStatus(StatusEvent status) {
+        this.status = status;
     }
 
     @Override
@@ -59,4 +75,6 @@ public class Event {
                 ", members=" + members +
                 '}';
     }
+
+
 }

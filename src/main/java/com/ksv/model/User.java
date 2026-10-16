@@ -1,10 +1,10 @@
 package com.ksv.model;
 
-public class MemberEvent {
+public class User {
     private int id;
     private String name;
 
-    public MemberEvent(int id, String name) {
+    public User(int id, String name) {
         this.id = id;
         this.name = name;
     }

@@ -15,7 +15,7 @@ public class UserService {
         return users.stream()
                 .filter(user -> user.getId() == id)
                 .findFirst()
-                .orElseThrow(()->new UserNotFoundException("Пользователь с таким " + id + " не существует."));
+                .orElseThrow(()->new UserNotFoundException("Пользователь с id= " + id + " не существует."));
     }
 
     public Optional<User> findUserById(int id){

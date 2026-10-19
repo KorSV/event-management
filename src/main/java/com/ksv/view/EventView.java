@@ -1,5 +1,6 @@
 package com.ksv.view;
 
+import com.ksv.exceptions.DomainException;
 import com.ksv.model.Event;
 import com.ksv.service.EventService;
 
@@ -39,15 +40,23 @@ public class EventView {
     }
 
     public void registerMemberEventHandler(){
-        var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
-        var idMember = inputReader.getInt("Введите идентификатор участника");
-        eventService.registerMember(idEvent, idMember);
+        try {
+            var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
+            var idMember = inputReader.getInt("Введите идентификатор участника");
+            eventService.registerMember(idEvent, idMember);
+        }catch (DomainException exception){
+            System.out.println("ошибка"+exception.getMessage());
+        }
     }
 
     public void unregisterMemberEventHandler(){
-        var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
-        var idMember = inputReader.getInt("Введите идентификатор участника");
-        eventService.unregisterMember(idEvent, idMember);
+        try {
+            var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
+            var idMember = inputReader.getInt("Введите идентификатор участника");
+            eventService.unregisterMember(idEvent, idMember);
+        }catch (DomainException exception){
+            System.out.println("Ошибка:"+exception.getMessage());
+        }
     }
 
     public void showStatusRegistration(){

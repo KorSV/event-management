@@ -36,8 +36,8 @@ public class EventService {
     }
 
     public void registerMember(int idEvent, int idUser){
-        User user = userService.getUserById(idUser);
         Event event = getEventById(idEvent);
+        User user = userService.getUserById(idUser);
         if (event.getStatus() == StatusEvent.ARCHIVE){
             throw new EventArchivedException("Нельзя записаться на архивное мероприятие");
         }

@@ -4,11 +4,11 @@ import com.ksv.exceptions.*;
 import com.ksv.model.Event;
 import com.ksv.model.User;
 import com.ksv.model.StatusEvent;
-import com.ksv.model.StatusRegistration;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class EventService {
 
@@ -27,45 +27,18 @@ public class EventService {
     }
 
     public Event cancelEvent(int idEvent){
-        Event event = getEventById(idEvent);
+        Event event = findEventById(idEvent).orElseThrow(() -> new EventNotFoundException("Мероприятие с ID="+idEvent+" не найдено"));
         if (event.getStatus() == StatusEvent.ARCHIVE){
-            throw new EventNotFoundException("Мероприятие с таким ID не найдено");
+            throw new EventAlreadyArchivedException("Мероприятие id="+event.getId()+" уже находится в архиве.");
         }
         event.setStatus(StatusEvent.ARCHIVE);
         return event;
     }
 
-    public Event getEventById(int idEvent){
-        for (Event event:events){
-            if (event.getId() == idEvent){
-                return event;
-            }
-        }
-        return null;
-    }
-
-    public boolean isUserRegistered(int idEvent, int idUser){
-        Event event = getEventById(idEvent);
-        if (event == null){
-            throw new EventNotFoundException("Мероприятие с таким id не найдено.");
-        }
-        List<User> eventUsers = event.getMembers();
-        for (User user:eventUsers){
-            if (user.getId() == idUser){
-                return true;
-            }
-        }
-        return false;
-    }
-
-
     public void registerMember(int idEvent, int idUser){
-        Event event = getEventById(idEvent);
         User user = userService.getUserById(idUser);
-        if (event == null){
-            throw new EventNotFoundException("событие с таким id не найдено");
-        }
-        if (event.getStatus().equals(StatusEvent.ARCHIVE)){
+        Event event = getEventById(idEvent);
+        if (event.getStatus() == StatusEvent.ARCHIVE){
             throw new EventArchivedException("Нельзя записаться на архивное мероприятие");
         }
         if (event.getMembers().size() == event.getMaxMembers()){
@@ -78,30 +51,35 @@ public class EventService {
     }
 
     public void unregisterMember(int idEvent, int idUser){
-        User user = userService.getUserById(idUser);
-        if (user == null){
-            throw new UserNotFoundException("Участник с таким id не найден");
+        if (userService.findUserById(idUser).isEmpty()){
+            throw new UserNotFoundException("Пользователь id="+ idUser +"не существует");
         }
         Event event = getEventById(idEvent);
-        if (event == null){
-            throw new EventNotFoundException("Мероприятие с таким id не найдено");
-        }
         if (!isUserRegistered(idEvent, idUser)){
             throw new UserNotRegisteredException("Этот пользователь не зарегистрирован на мероприятие");
         }
-        for (User eventUser:event.getMembers()){
-            if (eventUser.getId() == idEvent){
-                event.getMembers().remove(eventUser);
-            }
-        }
+        event.getMembers().removeIf(user -> user.getId() == idUser);
     }
 
-    public StatusRegistration getStatusRegistration(int eventId, int memberEventId){
-        return StatusRegistration.REGISTERED;
+    /*TODO: вспомогательные методы подлежащие переносу в repository*/
+    public Event getEventById(int idEvent){
+        return events.stream()
+                .filter((event)-> event.getId() == idEvent )
+                .findFirst()
+                .orElseThrow(()-> new EventNotFoundException("Мероприятие с id= " + idEvent + " не существует." ));
     }
 
-    public List<User> getListMember(){
-        return List.of();
+    public Optional<Event> findEventById(int idEvent){
+        return events.stream().filter(event -> event.getId() == idEvent).findFirst();
+    }
+
+    public boolean isUserRegistered(int idEvent, int idUser){
+        Event event = getEventById(idEvent);
+        return event.getMembers().stream().anyMatch((user)->user.getId()==idUser);
+    }
+
+    public List<User> getListMember(int idEvent){
+        return List.copyOf(getEventById(idEvent).getMembers());
     }
 
 

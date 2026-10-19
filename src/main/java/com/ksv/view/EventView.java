@@ -39,17 +39,14 @@ public class EventView {
     }
 
     public void registerMemberEventHandler(){
-        //пока заглушка
         var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
         var idMember = inputReader.getInt("Введите идентификатор участника");
         eventService.registerMember(idEvent, idMember);
     }
 
     public void unregisterMemberEventHandler(){
-        //пока заглушка
         var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
         var idMember = inputReader.getInt("Введите идентификатор участника");
-        System.out.println("unregistration of member handler");
         eventService.unregisterMember(idEvent, idMember);
     }
 

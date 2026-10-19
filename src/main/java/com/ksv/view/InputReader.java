@@ -17,7 +17,7 @@ public class InputReader {
     }
 
     public String getString(String prompt){
-        System.out.println(prompt);
+        System.out.print(prompt);
         return keyboard.nextLine();
     }
 }

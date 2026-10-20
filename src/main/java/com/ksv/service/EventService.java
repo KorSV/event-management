@@ -6,12 +6,17 @@ import com.ksv.model.User;
 import com.ksv.model.StatusEvent;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class EventService {
 
+    private static final int MIN_MEMBERS_LIMIT = 5;
+    private static final int MAX_MEMBERS_LIMIT = 1000;
+    private static final LocalTime EVENT_START_MIN = LocalTime.of(9,0);
+    private static final LocalTime EVENT_START_MAX = LocalTime.of(20,0);
     private final UserService userService;
     private final List<Event> events = new ArrayList<>();
     private int nextId = 1;
@@ -21,6 +26,24 @@ public class EventService {
     }
 
     public Event createEvent(String name, LocalDateTime startsAt, int maxMembers){
+        /* validation block*/
+        if ( name==null || name.isBlank()){
+            throw new ValidationException("Поле наименование мероприятия не может быть пустым");
+        }
+        if (maxMembers<MIN_MEMBERS_LIMIT){
+            throw new ValidationException("Максимальное количество участников мероприятия не может быть меньше " + MIN_MEMBERS_LIMIT);
+        }
+        if (maxMembers>MAX_MEMBERS_LIMIT){
+            throw new ValidationException("Максимальное количество участников мероприятия не может быть больше "+MAX_MEMBERS_LIMIT);
+        }
+        if (startsAt.isBefore(LocalDateTime.now())){
+            throw new ValidationException("Введенная вами дата мероприятия уже прошла");
+        }
+        if (startsAt.toLocalTime().isBefore(EVENT_START_MIN) || startsAt.toLocalTime().isAfter(EVENT_START_MAX)){
+            throw new ValidationException(
+                    String.format("Мероприятия могут проходить только в рабочее время c %s - %s", EVENT_START_MIN, EVENT_START_MAX ));
+        }
+        /*creation block*/
         Event event = new Event(nextId++, name, startsAt, maxMembers);
         events.add(event);
         return event;

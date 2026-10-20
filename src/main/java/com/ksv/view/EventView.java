@@ -4,9 +4,18 @@ import com.ksv.exceptions.DomainException;
 import com.ksv.model.Event;
 import com.ksv.service.EventService;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.util.function.Predicate;
 
 public class EventView {
+
+    private static final Predicate<Integer> DAY_VALIDATOR = d -> d>0 && d<32;
+    private static final Predicate<Integer> MONTH_VALIDATOR =m -> m>0 && m<13;
+    private static final Predicate<Integer> YEAR_VALIDATOR = y -> y>2025 && y<2100;
+    private static final Predicate<Integer> HOUR_VALIDATOR = h -> h>-1 && h<25;
+    private static final Predicate<Integer> MINUTE_VALIDATOR = mi -> mi>-1 && mi<60;
+    private static final Predicate<Integer> MAX_MEMBERS_OF_EVENT_VALIDATOR = m->m>0;
 
     private EventService eventService;
 
@@ -22,17 +31,30 @@ public class EventView {
     }
 
     public void createEventHandler(){
-        String name = inputReader.getString("Введите имя мероприятия: ");
-        int day = inputReader.getInt("Введите дату и время мероприятия: \nдень: ");
-        int month = inputReader.getInt("месяц: ");
-        int year = inputReader.getInt("год: ");
-        int hours = inputReader.getInt("часы (hh24): ");
-        int minutes = inputReader.getInt("минуты: ");
-        LocalDateTime startsAt = LocalDateTime.of(year, month, day, hours, minutes);
-        int maxMembers = inputReader.getInt("Введите максимальное количество участников");
-        Event event = eventService.createEvent( name, startsAt, maxMembers);
-        System.out.println("Мероприятие добавлено:" + event.toString());
-
+        while (true) {
+            String name = inputReader.getString("Введите имя мероприятия: ");
+            int day = inputReader.getInt("Введите дату и время мероприятия: \nдень: ", DAY_VALIDATOR,
+                    "День должен быть в интервале от 1 до 31.");
+            int month = inputReader.getInt("месяц: ", MONTH_VALIDATOR,
+                    "Месяц должен быть в интервале от 1 до 12.");
+            int year = inputReader.getInt("год: ", YEAR_VALIDATOR,
+                    "год должен быть в диапазоне от 2026 до 2100");
+            int hours = inputReader.getInt("часы (hh24): ", HOUR_VALIDATOR,
+                    "Поле час должно быть в интервале 0 до 23");
+            int minutes = inputReader.getInt("минуты: ", MINUTE_VALIDATOR,
+                    "Поле минуты должно быть в интервале от 0 до 59");
+            try {
+                LocalDateTime startsAt = LocalDateTime.of(year, month, day, hours, minutes);
+                int maxMembers = inputReader.getInt("Введите максимальное количество участников: "
+                        , MAX_MEMBERS_OF_EVENT_VALIDATOR
+                        , "Максимальное количество участников должно быть больше нуля.");
+                Event event = eventService.createEvent(name, startsAt, maxMembers);
+                System.out.println("Мероприятие добавлено:" + event.toString());
+                return;
+            } catch (DateTimeException e) {
+                System.out.println("Такой даты не существует. Прпробуйте снова.");
+            }
+        }
     }
 
     public void cancelEventHandler(){
@@ -60,6 +82,11 @@ public class EventView {
     }
 
     public void showStatusRegistration(){
+
+    }
+
+
+    protected void validateField(){
 
     }
 

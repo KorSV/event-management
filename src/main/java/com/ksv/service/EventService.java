@@ -82,6 +82,7 @@ public class EventService {
             throw new UserNotRegisteredException("Этот пользователь не зарегистрирован на мероприятие");
         }
         event.getMembers().removeIf(user -> user.getId() == idUser);
+        System.out.println(String.format("Отменена регистрация пользователь с id = %d с мероприятия id=%d", idUser, idEvent));
     }
 
     /*TODO: вспомогательные методы подлежащие переносу в repository*/

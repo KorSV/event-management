@@ -4,6 +4,8 @@ import com.ksv.exceptions.DomainException;
 import com.ksv.model.User;
 import com.ksv.service.UserService;
 
+import java.util.List;
+
 public class UserView {
     private InputReader inputReader;
     private UserService userService;
@@ -23,4 +25,11 @@ public class UserView {
         }
     }
 
+    public void showUsersHandler() {
+        List<User> users = userService.getUsers();
+        for (User user:users){
+            System.out.println(user.toString());
+        }
+
+    }
 }

@@ -1,12 +1,15 @@
 package com.ksv.view;
 
 import com.ksv.exceptions.DomainException;
+import com.ksv.exceptions.EventNotFoundException;
+import com.ksv.exceptions.UserNotFoundException;
 import com.ksv.model.Event;
 import com.ksv.service.EventService;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class EventView {
@@ -50,7 +53,7 @@ public class EventView {
                 startsAt = LocalDateTime.of(year, month, day, hours, minutes);
                 break;
             } catch (DateTimeException e) {
-                System.out.println("Такой даты не существует. Прпробуйте снова.");
+                System.out.println("Такой даты не существует. Попробуйте снова.");
             }
         }
         int maxMembers = inputReader.getInt("Введите максимальное количество участников: "
@@ -65,7 +68,13 @@ public class EventView {
     }
 
     public void cancelEventHandler() {
-
+        try {
+            var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
+            eventService.cancelEvent(idEvent);
+            System.out.println(String.format("Мероприятие id= %d переведено в архив", idEvent));
+        }catch (DomainException e){
+            System.out.println("ошибка" + e.getMessage());
+        }
     }
 
     public void registerMemberEventHandler() {
@@ -84,18 +93,28 @@ public class EventView {
             var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
             var idMember = inputReader.getInt("Введите идентификатор участника");
             eventService.unregisterMember(idEvent, idMember);
+            System.out.println(String.format("Отменена регистрация пользователь с id = %d с мероприятия id=%d", idMember, idEvent));
         } catch (DomainException exception) {
             System.out.println("Ошибка:" + exception.getMessage());
         }
     }
 
-    public void showStatusRegistration() {
-
+    public void showEventsHandler() {
+        List<Event> events = eventService.getEvents();
+        for(Event event:events){
+            System.out.println(event.toString());
+        }
     }
 
+    public void showEventDetailsHandler() {
+        int eventId = inputReader.getInt("Введите id мероприятия: ");
+        try {
+            Event event = eventService.findEventById(eventId).orElseThrow(()-> new EventNotFoundException("Мероприятие с таким id не существует"));
+            System.out.println(event.toString());
+        }catch (DomainException e){
+            System.out.println("Ошибка: "+e.getMessage());
+        }
 
-    protected void validateField() {
 
     }
-
 }

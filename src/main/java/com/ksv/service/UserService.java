@@ -14,6 +14,10 @@ public class UserService {
     private int nextId = 1;
     private List<User> users = new ArrayList<>();
 
+    public List<User> getUsers() {
+        return List.copyOf(users);
+    }
+
     public User getUserById(int id){
         return users.stream()
                 .filter(user -> user.getId() == id)
@@ -30,7 +34,7 @@ public class UserService {
             throw new ValidationException("Поле имя не может быть пустым");
         }
         if (name.length()<MIN_LENGTH_USERNAME){
-            throw new ValidationException("Имя пользователя не может быть меньше 5 символов");
+            throw new ValidationException(String.format("Имя пользователя не может быть меньше %d символов", MIN_LENGTH_USERNAME));
         }
         if (users.stream().anyMatch(user->user.getName().equals(name))){
             throw new ValidationException("Пользователь с таким именем уже существует. Попробуйте другое имя");

@@ -79,7 +79,7 @@ public class EventService {
 
     public void unregisterMember(int idEvent, int idUser){
         if (userService.findUserById(idUser).isEmpty()){
-            throw new UserNotFoundException("Пользователь id="+ idUser +"не существует");
+            throw new UserNotFoundException("Пользователь id="+ idUser +" не существует");
         }
         Event event = getEventById(idEvent);
         if (!isUserRegistered(idEvent, idUser)){
@@ -102,15 +102,9 @@ public class EventService {
 
     public boolean isUserRegistered(int idEvent, int idUser){
         Event event = getEventById(idEvent);
+        userService.findUserById(idUser)
+                .orElseThrow(()->new UserNotFoundException("Пользователь с таким id не найден"));
         return event.getMembers().stream().anyMatch((user)->user.getId()==idUser);
     }
-
-    public List<User> getListMember(int idEvent){
-        return List.copyOf(getEventById(idEvent).getMembers());
-    }
-
-
-
-
 
 }

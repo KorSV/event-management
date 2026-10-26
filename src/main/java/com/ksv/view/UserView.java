@@ -15,19 +15,22 @@ public class UserView {
         this.userService = userService;
     }
 
-    public void createUserHandler(){
+    public void createUserHandler() {
         String name = inputReader.getString("Введите имя пользователя: ");
         try {
             User user = userService.createUser(name);
-            System.out.println(String.format("Пользователь %s добавлен в систему c id = %d", user.getName(), user.getId()));
-        }catch (DomainException e){
+            System.out.println(String.format(
+                    "Пользователь %s добавлен в систему c id = %d",
+                    user.getName(),
+                    user.getId()));
+        } catch (DomainException e) {
             System.out.println("Ошибка создания пользователя: " + e.getMessage());
         }
     }
 
     public void showUsersHandler() {
         List<User> users = userService.getUsers();
-        for (User user:users){
+        for (User user : users) {
             System.out.println(user.toString());
         }
 

@@ -18,25 +18,27 @@ public class UserService {
         return List.copyOf(users);
     }
 
-    public User getUserById(int id){
+    public User getUserById(int id) {
         return users.stream()
                 .filter(user -> user.getId() == id)
                 .findFirst()
-                .orElseThrow(()->new UserNotFoundException("Пользователь с id= " + id + " не существует."));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id= " + id + " не существует."));
     }
 
-    public Optional<User> findUserById(int id){
-        return users.stream().filter(user-> user.getId() == id).findFirst();
+    public Optional<User> findUserById(int id) {
+        return users.stream().filter(user -> user.getId() == id).findFirst();
     }
 
-    public User createUser(String name){
-        if (name == null || name.isBlank()){
+    public User createUser(String name) {
+        if (name == null || name.isBlank()) {
             throw new ValidationException("Поле имя не может быть пустым");
         }
-        if (name.length()<MIN_LENGTH_USERNAME){
-            throw new ValidationException(String.format("Имя пользователя не может быть меньше %d символов", MIN_LENGTH_USERNAME));
+        if (name.length() < MIN_LENGTH_USERNAME) {
+            throw new ValidationException(String.format(
+                    "Имя пользователя не может быть меньше %d символов",
+                    MIN_LENGTH_USERNAME));
         }
-        if (users.stream().anyMatch(user->user.getName().equals(name))){
+        if (users.stream().anyMatch(user -> user.getName().equals(name))) {
             throw new ValidationException("Пользователь с таким именем уже существует. Попробуйте другое имя");
         }
         User user = new User(nextId++, name);

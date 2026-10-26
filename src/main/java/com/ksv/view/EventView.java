@@ -2,7 +2,6 @@ package com.ksv.view;
 
 import com.ksv.exceptions.DomainException;
 import com.ksv.exceptions.EventNotFoundException;
-import com.ksv.exceptions.UserNotFoundException;
 import com.ksv.model.Event;
 import com.ksv.service.EventService;
 
@@ -14,11 +13,21 @@ import java.util.function.Predicate;
 
 public class EventView {
 
-    private static final Predicate<Integer> DAY_VALIDATOR = d -> d > 0 && d < 32;
-    private static final Predicate<Integer> MONTH_VALIDATOR = m -> m > 0 && m < 13;
-    private static final Predicate<Integer> YEAR_VALIDATOR = y -> y > LocalDate.now().getYear()-1 && y < LocalDate.now().getYear() + 1;
-    private static final Predicate<Integer> HOUR_VALIDATOR = h -> h > -1 && h < 25;
-    private static final Predicate<Integer> MINUTE_VALIDATOR = mi -> mi > -1 && mi < 60;
+    private static final int MIN_DAY = 1;
+    private static final int MAX_DAY = 31;
+    private static final int MIN_MONTH = 1;
+    private static final int MAX_MONTH = 12;
+    private static final int MIN_HOUR = 0;
+    private static final int MAX_HOUR = 23;
+    private static final int MIN_MINUTE = 0;
+    private static final int MAX_MINUTE = 59;
+    private static final Predicate<Integer> DAY_VALIDATOR = d -> d >= MIN_DAY && d <= MAX_DAY;
+    private static final Predicate<Integer> MONTH_VALIDATOR = m -> m >= MIN_MONTH && m <= MAX_MONTH;
+    private static final Predicate<Integer> YEAR_VALIDATOR =
+            y -> y > LocalDate.now().getYear() - 1
+                    && y < LocalDate.now().getYear() + 1;
+    private static final Predicate<Integer> HOUR_VALIDATOR = h -> h >= MIN_HOUR && h <= MAX_HOUR;
+    private static final Predicate<Integer> MINUTE_VALIDATOR = mi -> mi >= MIN_MINUTE && mi <= MAX_MINUTE;
     private static final Predicate<Integer> MAX_MEMBERS_OF_EVENT_VALIDATOR = m -> m > 0;
 
     private EventService eventService;
@@ -72,7 +81,7 @@ public class EventView {
             var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
             eventService.cancelEvent(idEvent);
             System.out.println(String.format("Мероприятие id= %d переведено в архив", idEvent));
-        }catch (DomainException e){
+        } catch (DomainException e) {
             System.out.println("ошибка" + e.getMessage());
         }
     }
@@ -93,7 +102,10 @@ public class EventView {
             var idEvent = inputReader.getInt("Введите идентификатор мероприятия: ");
             var idMember = inputReader.getInt("Введите идентификатор участника");
             eventService.unregisterMember(idEvent, idMember);
-            System.out.println(String.format("Отменена регистрация пользователь с id = %d с мероприятия id=%d", idMember, idEvent));
+            System.out.println(String.format(
+                    "Отменена регистрация пользователь с id = %d с мероприятия id=%d",
+                    idMember,
+                    idEvent));
         } catch (DomainException exception) {
             System.out.println("Ошибка:" + exception.getMessage());
         }
@@ -101,7 +113,7 @@ public class EventView {
 
     public void showEventsHandler() {
         List<Event> events = eventService.getEvents();
-        for(Event event:events){
+        for (Event event : events) {
             System.out.println(event.toString());
         }
     }
@@ -109,10 +121,11 @@ public class EventView {
     public void showEventDetailsHandler() {
         int eventId = inputReader.getInt("Введите id мероприятия: ");
         try {
-            Event event = eventService.findEventById(eventId).orElseThrow(()-> new EventNotFoundException("Мероприятие с таким id не существует"));
+            Event event = eventService.findEventById(eventId)
+                    .orElseThrow(() -> new EventNotFoundException("Мероприятие с таким id не существует"));
             System.out.println(event.toString());
-        }catch (DomainException e){
-            System.out.println("Ошибка: "+e.getMessage());
+        } catch (DomainException e) {
+            System.out.println("Ошибка: " + e.getMessage());
         }
 
 

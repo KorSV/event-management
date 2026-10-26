@@ -1,5 +1,16 @@
 package com.ksv.view;
 
+
+import static com.ksv.view.ItemMenu.ADD_EVENT;
+import static com.ksv.view.ItemMenu.ADD_USER;
+import static com.ksv.view.ItemMenu.CANCEL_EVENT;
+import static com.ksv.view.ItemMenu.EVENT_DETAILS;
+import static com.ksv.view.ItemMenu.EXIT;
+import static com.ksv.view.ItemMenu.REGISTER_MEMBER;
+import static com.ksv.view.ItemMenu.SHOW_EVENTS;
+import static com.ksv.view.ItemMenu.SHOW_USERS;
+import static com.ksv.view.ItemMenu.UNREGISTER_MEMBER;
+
 public class ConsoleApplication {
     private Menu menu;
     private InputReader inputReader;
@@ -14,43 +25,43 @@ public class ConsoleApplication {
         init();
     }
 
-    private void init(){
+    private void init() {
         this.menu = new Menu();
-        menu.addItem(1, "Добавить сотрудника");
-        menu.addItem(2, "Показать участников");
-        menu.addItem(3, "Добавить мероприятие");
-        menu.addItem(4, "Отменить мероприятие");
-        menu.addItem(5, "Список мероприятий");
-        menu.addItem(6, "Показать детали мероприятия");
-        menu.addItem(7, "Зарегистрировать участника");
-        menu.addItem(8, "Отменить регистрацию участника");
-        menu.addItem(0, "Выход");
+        menu.addItem(ADD_USER, "Добавить сотрудника");
+        menu.addItem(SHOW_USERS, "Показать участников");
+        menu.addItem(ADD_EVENT, "Добавить мероприятие");
+        menu.addItem(CANCEL_EVENT, "Отменить мероприятие");
+        menu.addItem(SHOW_EVENTS, "Список мероприятий");
+        menu.addItem(EVENT_DETAILS, "Показать детали мероприятия");
+        menu.addItem(REGISTER_MEMBER, "Зарегистрировать участника");
+        menu.addItem(UNREGISTER_MEMBER, "Отменить регистрацию участника");
+        menu.addItem(EXIT, "Выход");
     }
 
-    public void run(){
+    public void run() {
         this.running = true;
-        while (running){
+        while (running) {
             menu.show();
             handleChoice(inputReader.getInt("Выберите пункт меню: "));
         }
     }
 
-    private void stop(){
+    private void stop() {
         this.running = false;
         System.out.println("До свидания!");
     }
 
-    private void handleChoice(int choice){
-        switch (choice){
-            case 1 -> userView.createUserHandler();
-            case 2 -> userView.showUsersHandler();
-            case 3 -> eventView.createEventHandler();
-            case 4 -> eventView.cancelEventHandler();
-            case 5 -> eventView.showEventsHandler();
-            case 6 -> eventView.showEventDetailsHandler();
-            case 7 -> eventView.registerMemberEventHandler();
-            case 8 -> eventView.unregisterMemberEventHandler();
-            case 0 -> stop();
+    private void handleChoice(int choice) {
+        switch (choice) {
+            case ADD_USER -> userView.createUserHandler();
+            case SHOW_USERS -> userView.showUsersHandler();
+            case ADD_EVENT -> eventView.createEventHandler();
+            case CANCEL_EVENT -> eventView.cancelEventHandler();
+            case SHOW_EVENTS -> eventView.showEventsHandler();
+            case EVENT_DETAILS -> eventView.showEventDetailsHandler();
+            case REGISTER_MEMBER -> eventView.registerMemberEventHandler();
+            case UNREGISTER_MEMBER -> eventView.unregisterMemberEventHandler();
+            case EXIT -> stop();
             default -> System.out.println("В меню нет такого пункта. Выберите из списка.");
         }
     }

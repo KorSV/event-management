@@ -12,18 +12,18 @@ public class Menu {
         items = new ArrayList<>();
     }
 
-    public void addItem(int id, String title){
+    public void addItem(int id, String title) {
         this.items.add(new ItemMenu(id, title));
     }
 
 
-    public void show(){
+    public void show() {
         if (items.isEmpty()) {
             System.out.println("В меню нет ни одного пункта. Добавьте пункты в меню.");
             return;
         }
         System.out.println("===Меню===");
-        for(ItemMenu item:items){
+        for (ItemMenu item : items) {
             System.out.println(item);
         }
     }

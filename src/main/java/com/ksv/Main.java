@@ -15,7 +15,7 @@ public class Main {
         EventView eventView = new EventView(eventService, inputReader);
         UserView userView = new UserView(inputReader, userService);
 
-        ConsoleApplication application = new ConsoleApplication(eventView,userView, inputReader);
+        ConsoleApplication application = new ConsoleApplication(eventView, userView, inputReader);
         application.run();
     }
 }

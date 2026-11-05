@@ -2,8 +2,10 @@ package com.ksv.model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 
 public class Event {
     private int id;
@@ -11,16 +13,14 @@ public class Event {
     private String name;
     private StatusEvent status;
     private int maxMembers;
-    private List<User> members;
+    private final List<User> members = new ArrayList<>();
+    private final Queue<User> waitList = new LinkedList<>();
 
-    public Event() {
-    }
 
     public Event( String name, LocalDateTime startsAt, int maxMembers) {
         this.startsAt = startsAt;
         this.name = name;
         this.maxMembers = maxMembers;
-        this.members = new ArrayList<>();
         this.status = StatusEvent.ACTUAL;
     }
 
@@ -44,10 +44,6 @@ public class Event {
         return members;
     }
 
-    public void setMembers(List<User> members) {
-        this.members = members;
-    }
-
     public LocalDateTime getStartsAt() {
         return startsAt;
     }
@@ -64,6 +60,12 @@ public class Event {
         this.status = status;
     }
 
+    public Queue<User> getWaitList() {
+        return waitList;
+    }
+
+
+
     @Override
     public String toString() {
         return "Event{" +
@@ -73,6 +75,7 @@ public class Event {
                 ", status=" + status +
                 ", maxMembers=" + maxMembers +
                 ", members=" + members +
+                ", waitList=" + waitList +
                 '}';
     }
 

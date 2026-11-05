@@ -1,8 +1,7 @@
 package com.ksv.service;
 
 import com.ksv.exceptions.EventAlreadyArchivedException;
-import com.ksv.exceptions.EventArchivedException;
-import com.ksv.exceptions.EventFullException;
+import com.ksv.exceptions.CannotRegisterOnArchivedEventException;
 import com.ksv.exceptions.EventNotFoundException;
 import com.ksv.exceptions.MemberAlreadyRegisterException;
 import com.ksv.exceptions.UserNotFoundException;
@@ -10,6 +9,7 @@ import com.ksv.exceptions.UserNotRegisteredException;
 import com.ksv.exceptions.ValidationException;
 import com.ksv.model.Event;
 import com.ksv.model.StatusEvent;
+import com.ksv.model.StatusRegistration;
 import com.ksv.model.User;
 import com.ksv.repositories.EventRepository;
 
@@ -79,15 +79,16 @@ public class EventService {
         Event event = getEventById(idEvent);
         User user = userService.getUserById(idUser);
         if (event.getStatus() == StatusEvent.ARCHIVE) {
-            throw new EventArchivedException("Нельзя записаться на архивное мероприятие");
+            throw new CannotRegisterOnArchivedEventException("Нельзя записаться на архивное мероприятие");
         }
-        if (event.getMembers().size() == event.getMaxMembers()) {
-            throw new EventFullException("Нет свободных мест");
-        }
-        if (event.getMembers().contains(user)) {
+        if (getStatusRegistration(event, idUser) != StatusRegistration.NOT_REGISTERED) {
             throw new MemberAlreadyRegisterException("Этот участник уже зарегистрирован на это мероприятие");
         }
-        event.getMembers().add(user);
+        if (event.getMembers().size() == event.getMaxMembers()) {
+            event.getWaitList().offer(user);
+        } else {
+            event.getMembers().add(user);
+        }
         eventRepository.save(event);
     }
 
@@ -96,10 +97,21 @@ public class EventService {
             throw new UserNotFoundException("Пользователь id=" + idUser + " не существует");
         }
         Event event = getEventById(idEvent);
-        if (!isUserRegistered(idEvent, idUser)) {
-            throw new UserNotRegisteredException("Этот пользователь не зарегистрирован на мероприятие");
+        switch (getStatusRegistration(event, idUser)) {
+            case REGISTERED -> {
+                event.getMembers().removeIf(user -> user.getId() == idUser);
+                User member = event.getWaitList().poll();
+                if (member != null) {
+                    event.getMembers().add(member);
+                }
+            }
+            case WAITLIST -> {
+                event.getWaitList().removeIf(user -> user.getId() == idUser);
+            }
+            case NOT_REGISTERED -> {
+                throw new UserNotRegisteredException("Этот пользователь не зарегистрирован на мероприятие");
+            }
         }
-        event.getMembers().removeIf(user -> user.getId() == idUser);
         eventRepository.save(event);
     }
 
@@ -112,9 +124,14 @@ public class EventService {
         return eventRepository.findById(idEvent);
     }
 
-    public boolean isUserRegistered(int idEvent, int idUser) {
-        Event event = getEventById(idEvent);
-        return event.getMembers().stream().anyMatch((user) -> user.getId() == idUser);
+
+    public StatusRegistration getStatusRegistration(Event event, int idUser) {
+        if (event.getMembers().stream().anyMatch((user) -> user.getId() == idUser)) {
+            return StatusRegistration.REGISTERED;
+        } else if (event.getWaitList().stream().anyMatch((user) -> user.getId() == idUser)) {
+            return StatusRegistration.WAITLIST;
+        }
+        return StatusRegistration.NOT_REGISTERED;
     }
 
 }

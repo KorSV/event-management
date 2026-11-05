@@ -39,10 +39,6 @@ public class EventView {
         this.inputReader = inputReader;
     }
 
-    public void showEventDetails() {
-
-    }
-
     public void createEventHandler() {
 
         String name = inputReader.getString("Введите имя мероприятия: ");

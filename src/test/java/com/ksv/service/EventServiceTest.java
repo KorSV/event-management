@@ -1,8 +1,7 @@
 package com.ksv.service;
 
 import com.ksv.exceptions.EventAlreadyArchivedException;
-import com.ksv.exceptions.EventArchivedException;
-import com.ksv.exceptions.EventFullException;
+import com.ksv.exceptions.CannotRegisterOnArchivedEventException;
 import com.ksv.exceptions.EventNotFoundException;
 import com.ksv.exceptions.MemberAlreadyRegisterException;
 import com.ksv.exceptions.UserNotFoundException;
@@ -10,6 +9,7 @@ import com.ksv.exceptions.UserNotRegisteredException;
 import com.ksv.exceptions.ValidationException;
 import com.ksv.model.Event;
 import com.ksv.model.StatusEvent;
+import com.ksv.model.StatusRegistration;
 import com.ksv.model.User;
 import com.ksv.repositories.EventRepository;
 import com.ksv.repositories.UserRepository;
@@ -154,13 +154,13 @@ class EventServiceTest {
         eventService.cancelEvent(event.getId());
         User user = userService.createUser("admin");
         assertThatThrownBy(() -> eventService.registerMember(event.getId(), user.getId()))
-                .isInstanceOf(EventArchivedException.class)
+                .isInstanceOf(CannotRegisterOnArchivedEventException.class)
                 .hasMessageContaining("Нельзя записаться на архивное мероприятие");
 
     }
 
     @Test
-    void registerMember_shouldThrow_whenEventIsFull() {
+    void registerMember_shouldAddUserToWaitList_whenEventIsFull() {
         Event event = eventService.createEvent("test event"
                 , LocalDateTime.now().plusDays(1)
                 , 5);
@@ -168,10 +168,9 @@ class EventServiceTest {
             eventService.registerMember(event.getId(),
                     userService.createUser("user" + i).getId());
         }
-        assertThatThrownBy(() -> eventService
-                .registerMember(event.getId(), userService.createUser("admin").getId()))
-                .isInstanceOf(EventFullException.class)
-                .hasMessageContaining("Нет свободных мест");
+        User user = userService.createUser("admin");
+        eventService.registerMember(event.getId(), user.getId());
+        assertThat(event.getWaitList()).extracting(User::getName).containsExactly("admin");
     }
 
     @Test
@@ -265,29 +264,40 @@ class EventServiceTest {
     }
 
     @Test
-    void isUserRegistered_shouldTrue_whenUserRegisteredOnEvent() {
+    void getStatusRegistration_shouldReturnNOT_REGISTERED_whenUserNotRegistred(){
         Event event = eventService.createEvent("test event"
                 , LocalDateTime.now().plusDays(1)
                 , 10);
-        User user = userService.createUser("admin");
+        User user = userService.createUser("user");
+        assertThat(eventService.getStatusRegistration(event, user.getId()))
+                .isEqualTo(StatusRegistration.NOT_REGISTERED);
+    }
+
+    @Test
+    void getStatusRegistration_shouldReturnWAITLIST_whenUserInWaitList(){
+        Event event = eventService.createEvent("test event"
+                , LocalDateTime.now().plusDays(1)
+                , 5);
+        for (int i = 0; i < 5; i++) {
+            eventService.registerMember(event.getId(),
+                    userService.createUser("user" + i).getId());
+        }
+        User admin = userService.createUser("admin");
+        eventService.registerMember(event.getId(), admin.getId());
+        assertThat(eventService.getStatusRegistration(event, admin.getId()))
+                .isEqualTo(StatusRegistration.WAITLIST);
+    }
+
+    @Test
+    void getStatusRegistration_shouldReturnREGISTERED_whenUserIsRegistered(){
+        Event event = eventService.createEvent("test event"
+                , LocalDateTime.now().plusDays(1)
+                , 10);
+        User user = userService.createUser("user");
         eventService.registerMember(event.getId(), user.getId());
-        assertThat(eventService.isUserRegistered(event.getId(), user.getId())).isTrue();
+        assertThat(eventService.getStatusRegistration(event, user.getId())).isEqualTo(StatusRegistration.REGISTERED);
     }
 
-    @Test
-    void isUserRegistered_shouldFalse_whenUserDoesNotRegisteredOnEvent() {
-        Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
-                , 10);
-        User user = userService.createUser("admin");
-        assertThat(eventService.isUserRegistered(event.getId(), user.getId())).isFalse();
-    }
 
-    @Test
-    void isUserRegistered_shouldThrow_whenEventDoesNotExist() {
-        User user = userService.createUser("admin");
-        assertThatThrownBy(() -> eventService.isUserRegistered(999, user.getId()))
-                .isInstanceOf(EventNotFoundException.class);
-    }
 
 }

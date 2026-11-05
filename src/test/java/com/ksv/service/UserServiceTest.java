@@ -3,6 +3,7 @@ package com.ksv.service;
 import com.ksv.exceptions.UserNotFoundException;
 import com.ksv.exceptions.ValidationException;
 import com.ksv.model.User;
+import com.ksv.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,11 +17,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 public class UserServiceTest {
+    private UserRepository userRepository;
     private UserService userService;
 
     @BeforeEach
     void init() {
-        userService = new UserService();
+        userRepository = new UserRepository();
+        userService = new UserService(userRepository);
     }
 
     @Test

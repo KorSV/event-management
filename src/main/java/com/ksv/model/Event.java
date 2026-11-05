@@ -16,8 +16,7 @@ public class Event {
     public Event() {
     }
 
-    public Event(int id, String name, LocalDateTime startsAt, int maxMembers) {
-        this.id = id;
+    public Event( String name, LocalDateTime startsAt, int maxMembers) {
         this.startsAt = startsAt;
         this.name = name;
         this.maxMembers = maxMembers;

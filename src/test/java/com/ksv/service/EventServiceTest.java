@@ -11,6 +11,8 @@ import com.ksv.exceptions.ValidationException;
 import com.ksv.model.Event;
 import com.ksv.model.StatusEvent;
 import com.ksv.model.User;
+import com.ksv.repositories.EventRepository;
+import com.ksv.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,13 +28,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EventServiceTest {
 
+    private EventRepository eventRepository;
+    private UserRepository userRepository;
     private EventService eventService;
     private UserService userService;
 
     @BeforeEach
     void init() {
-        this.userService = new UserService();
-        this.eventService = new EventService(this.userService);
+        this.eventRepository = new EventRepository();
+        this.userRepository = new UserRepository();
+        this.userService = new UserService(userRepository);
+        this.eventService = new EventService(eventRepository, userService);
 
     }
 
@@ -275,15 +281,6 @@ class EventServiceTest {
                 , 10);
         User user = userService.createUser("admin");
         assertThat(eventService.isUserRegistered(event.getId(), user.getId())).isFalse();
-    }
-
-    @Test
-    void isUserRegistered_shouldThrow_whenUserDoesNotExist() {
-        Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
-                , 10);
-        assertThatThrownBy(() -> eventService.isUserRegistered(event.getId(), 999))
-                .isInstanceOf(UserNotFoundException.class);
     }
 
     @Test

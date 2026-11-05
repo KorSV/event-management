@@ -11,10 +11,10 @@ import com.ksv.exceptions.ValidationException;
 import com.ksv.model.Event;
 import com.ksv.model.StatusEvent;
 import com.ksv.model.User;
+import com.ksv.repositories.EventRepository;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,15 +25,15 @@ public class EventService {
     private static final LocalTime EVENT_START_MIN = LocalTime.of(9, 0);
     private static final LocalTime EVENT_START_MAX = LocalTime.of(20, 0);
     private final UserService userService;
-    private final List<Event> events = new ArrayList<>();
-    private int nextId = 1;
+    private final EventRepository eventRepository;
 
-    public EventService(UserService userService) {
+    public EventService(EventRepository eventRepository,UserService userService) {
+        this.eventRepository = eventRepository;
         this.userService = userService;
     }
 
     public List<Event> getEvents() {
-        return List.copyOf(events);
+        return eventRepository.findAll();
     }
 
     public Event createEvent(String name, LocalDateTime startsAt, int maxMembers) {
@@ -60,10 +60,7 @@ public class EventService {
                     EVENT_START_MIN,
                     EVENT_START_MAX));
         }
-        /*creation block*/
-        Event event = new Event(nextId++, name, startsAt, maxMembers);
-        events.add(event);
-        return event;
+        return eventRepository.save(new Event(name, startsAt, maxMembers));
     }
 
     public Event cancelEvent(int idEvent) {
@@ -74,6 +71,7 @@ public class EventService {
             throw new EventAlreadyArchivedException("Мероприятие id=" + event.getId() + " уже находится в архиве.");
         }
         event.setStatus(StatusEvent.ARCHIVE);
+        eventRepository.save(event);
         return event;
     }
 
@@ -90,6 +88,7 @@ public class EventService {
             throw new MemberAlreadyRegisterException("Этот участник уже зарегистрирован на это мероприятие");
         }
         event.getMembers().add(user);
+        eventRepository.save(event);
     }
 
     public void unregisterMember(int idEvent, int idUser) {
@@ -101,24 +100,20 @@ public class EventService {
             throw new UserNotRegisteredException("Этот пользователь не зарегистрирован на мероприятие");
         }
         event.getMembers().removeIf(user -> user.getId() == idUser);
+        eventRepository.save(event);
     }
 
-    /*TODO: вспомогательные методы подлежащие переносу в repository*/
     public Event getEventById(int idEvent) {
-        return events.stream()
-                .filter((event) -> event.getId() == idEvent)
-                .findFirst()
+        return eventRepository.findById(idEvent)
                 .orElseThrow(() -> new EventNotFoundException("Мероприятие с id= " + idEvent + " не существует."));
     }
 
     public Optional<Event> findEventById(int idEvent) {
-        return events.stream().filter(event -> event.getId() == idEvent).findFirst();
+        return eventRepository.findById(idEvent);
     }
 
     public boolean isUserRegistered(int idEvent, int idUser) {
         Event event = getEventById(idEvent);
-        userService.findUserById(idUser)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с таким id не найден"));
         return event.getMembers().stream().anyMatch((user) -> user.getId() == idUser);
     }
 

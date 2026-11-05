@@ -209,10 +209,6 @@ class EventServiceTest {
                 .isInstanceOf(UserNotRegisteredException.class)
                 .hasMessageContaining("Этот пользователь не зарегистрирован на мероприятие");
     }
-    @Test
-    void test() {
-        int x = 12345;  // ← MagicNumber, должно упасть
-    }
 
     @Test
     void unregisterMember_shouldRemoveUserFormEventMembers() {

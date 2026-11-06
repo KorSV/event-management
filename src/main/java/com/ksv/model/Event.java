@@ -1,8 +1,8 @@
 package com.ksv.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
@@ -14,7 +14,7 @@ public class Event {
     private StatusEvent status;
     private int maxMembers;
     private final List<User> members = new ArrayList<>();
-    private final Queue<User> waitList = new LinkedList<>();
+    private final Queue<User> waitList = new ArrayDeque<>();
 
 
     public Event( String name, LocalDateTime startsAt, int maxMembers) {

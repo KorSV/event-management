@@ -7,6 +7,7 @@ import com.ksv.exceptions.MemberAlreadyRegisterException;
 import com.ksv.exceptions.UserNotFoundException;
 import com.ksv.exceptions.UserNotRegisteredException;
 import com.ksv.exceptions.ValidationException;
+import com.ksv.model.Action;
 import com.ksv.model.Event;
 import com.ksv.model.StatusEvent;
 import com.ksv.model.StatusRegistration;
@@ -26,10 +27,12 @@ public class EventService {
     private static final LocalTime EVENT_START_MAX = LocalTime.of(20, 0);
     private final UserService userService;
     private final EventRepository eventRepository;
+    private final ActionHistoryService actionHistoryService;
 
-    public EventService(EventRepository eventRepository,UserService userService) {
+    public EventService(EventRepository eventRepository,UserService userService, ActionHistoryService actionHistoryService) {
         this.eventRepository = eventRepository;
         this.userService = userService;
+        this.actionHistoryService = actionHistoryService;
     }
 
     public List<Event> getEvents() {
@@ -90,6 +93,11 @@ public class EventService {
             event.getMembers().add(user);
         }
         eventRepository.save(event);
+        actionHistoryService.push(new Action(() -> {
+            event.getMembers().removeIf(u -> u.getId() == user.getId());
+            event.getWaitList().removeIf(u -> u.getId() == user.getId());
+            eventRepository.save(event);
+        }));
     }
 
     public void unregisterMember(int idEvent, int idUser) {
@@ -97,6 +105,7 @@ public class EventService {
             throw new UserNotFoundException("Пользователь id=" + idUser + " не существует");
         }
         Event event = getEventById(idEvent);
+        Action action;
         switch (getStatusRegistration(event, idUser)) {
             case REGISTERED -> {
                 event.getMembers().removeIf(user -> user.getId() == idUser);
@@ -104,6 +113,7 @@ public class EventService {
                 if (member != null) {
                     event.getMembers().add(member);
                 }
+                action = new Action(()->)
             }
             case WAITLIST -> {
                 event.getWaitList().removeIf(user -> user.getId() == idUser);

@@ -9,6 +9,7 @@ import static com.ksv.view.ItemMenu.EXIT;
 import static com.ksv.view.ItemMenu.REGISTER_MEMBER;
 import static com.ksv.view.ItemMenu.SHOW_EVENTS;
 import static com.ksv.view.ItemMenu.SHOW_USERS;
+import static com.ksv.view.ItemMenu.UNDO_ACTION;
 import static com.ksv.view.ItemMenu.UNREGISTER_MEMBER;
 
 public class ConsoleApplication {
@@ -16,11 +17,13 @@ public class ConsoleApplication {
     private InputReader inputReader;
     private EventView eventView;
     private UserView userView;
+    private ActionHistoryView actionHistoryView;
     private boolean running;
 
-    public ConsoleApplication(EventView eventView, UserView userView, InputReader inputReader) {
+    public ConsoleApplication(EventView eventView, UserView userView, ActionHistoryView actionHistoryView, InputReader inputReader) {
         this.eventView = eventView;
         this.userView = userView;
+        this.actionHistoryView = actionHistoryView;
         this.inputReader = inputReader;
         init();
     }
@@ -35,6 +38,7 @@ public class ConsoleApplication {
         menu.addItem(EVENT_DETAILS, "Показать детали мероприятия");
         menu.addItem(REGISTER_MEMBER, "Зарегистрировать участника");
         menu.addItem(UNREGISTER_MEMBER, "Отменить регистрацию участника");
+        menu.addItem(UNDO_ACTION, "Отменить последнее действие");
         menu.addItem(EXIT, "Выход");
     }
 
@@ -61,6 +65,7 @@ public class ConsoleApplication {
             case EVENT_DETAILS -> eventView.showEventDetailsHandler();
             case REGISTER_MEMBER -> eventView.registerMemberEventHandler();
             case UNREGISTER_MEMBER -> eventView.unregisterMemberEventHandler();
+            case UNDO_ACTION -> actionHistoryView.undoActionHandler();
             case EXIT -> stop();
             default -> System.out.println("В меню нет такого пункта. Выберите из списка.");
         }

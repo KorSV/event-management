@@ -10,6 +10,7 @@ public class ItemMenu {
     public static final int EVENT_DETAILS = 6;
     public static final int REGISTER_MEMBER = 7;
     public static final int UNREGISTER_MEMBER = 8;
+    public static final int UNDO_ACTION = 9;
     public static final int EXIT = 0;
 
     private int id;

@@ -32,13 +32,16 @@ class EventServiceTest {
     private UserRepository userRepository;
     private EventService eventService;
     private UserService userService;
+    private ActionHistoryService actionHistoryService;
 
     @BeforeEach
     void init() {
         this.eventRepository = new EventRepository();
         this.userRepository = new UserRepository();
         this.userService = new UserService(userRepository);
-        this.eventService = new EventService(eventRepository, userService);
+        this.actionHistoryService = new ActionHistoryService();
+
+        this.eventService = new EventService(eventRepository, userService, actionHistoryService);
 
     }
 

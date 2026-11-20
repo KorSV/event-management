@@ -51,7 +51,7 @@ class EventServiceTest {
     }
 
     @Test
-    void getEvents_shouldReturnEventList_whenUsersExist() {
+    void getEvents_shouldReturnEventList_whenEventsExist() {
         eventService.createEvent("event1"
                 , LocalDateTime.now().plusDays(1)
                 , 10);
@@ -243,7 +243,6 @@ class EventServiceTest {
                 .isEqualTo("test event");
     }
 
-
     @Test
     void getEventById_shouldThrow_whenEventDoesNotExist() {
         assertThatThrownBy(() -> eventService.getEventById(999))
@@ -300,7 +299,5 @@ class EventServiceTest {
         eventService.registerMember(event.getId(), user.getId());
         assertThat(eventService.getStatusRegistration(event, user.getId())).isEqualTo(StatusRegistration.REGISTERED);
     }
-
-
 
 }

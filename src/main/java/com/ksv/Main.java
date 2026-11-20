@@ -22,7 +22,7 @@ public class Main {
         EventService eventService = new EventService(eventRepository, userService, actionHistoryService);
         EventView eventView = new EventView(eventService, inputReader);
         UserView userView = new UserView(inputReader, userService);
-        ActionHistoryView actionHistoryView = new ActionHistoryView(actionHistoryService);
+        ActionHistoryView actionHistoryView = new ActionHistoryView(actionHistoryService, inputReader);
 
         ConsoleApplication application = new ConsoleApplication(eventView, userView, actionHistoryView, inputReader);
         application.run();

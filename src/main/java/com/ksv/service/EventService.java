@@ -63,7 +63,14 @@ public class EventService {
                     EVENT_START_MIN,
                     EVENT_START_MAX));
         }
-        return eventRepository.save(new Event(name, startsAt, maxMembers));
+        Event savedEvent = eventRepository.save(new Event(name, startsAt, maxMembers));
+        actionHistoryService.push(new Action(
+                "Отменить создание мероприятия id="+ savedEvent.getId(),
+                ()->{eventRepository.delete(savedEvent.getId()).orElseThrow(
+                        ()->new EventNotFoundException(
+                                "Нельзя отменить создание: мероприятие id="+savedEvent.getId()+" не найдено"));}
+        ));
+        return savedEvent;
     }
 
     public Event cancelEvent(int idEvent) {
@@ -75,6 +82,11 @@ public class EventService {
         }
         event.setStatus(StatusEvent.ARCHIVE);
         eventRepository.save(event);
+        actionHistoryService.push(
+                new Action("Событие id="+idEvent+" ,было отменено. Хотите вернуть его?",
+                () -> {event.setStatus(StatusEvent.ACTUAL);
+                        eventRepository.save(event);}
+        ));
         return event;
     }
 
@@ -93,10 +105,11 @@ public class EventService {
             event.getMembers().add(user);
         }
         eventRepository.save(event);
-        actionHistoryService.push(new Action(() -> {
-            event.getMembers().removeIf(u -> u.getId() == user.getId());
-            event.getWaitList().removeIf(u -> u.getId() == user.getId());
-            eventRepository.save(event);
+        actionHistoryService.push(
+                new Action("Отменить регистрацию пользователя id="+idUser+" на мероприятие id="+idEvent+"?",
+                () -> {event.getMembers().removeIf(u -> u.getId() == user.getId());
+                event.getWaitList().removeIf(u -> u.getId() == user.getId());
+                eventRepository.save(event);
         }));
     }
 
@@ -105,24 +118,45 @@ public class EventService {
             throw new UserNotFoundException("Пользователь id=" + idUser + " не существует");
         }
         Event event = getEventById(idEvent);
-        Action action;
+        User removedUser = userService.getUserById(idUser);
         switch (getStatusRegistration(event, idUser)) {
             case REGISTERED -> {
+                User promotedUser = event.getWaitList().poll();
                 event.getMembers().removeIf(user -> user.getId() == idUser);
-                User member = event.getWaitList().poll();
-                if (member != null) {
-                    event.getMembers().add(member);
+                //User member = event.getWaitList().poll();
+                if (promotedUser != null) {
+                    event.getMembers().add(promotedUser);
                 }
-                action = new Action(()->)
+                actionHistoryService.push(
+                        new Action("отменить отмену регистрации пользователя id=?"+idUser,
+                                ()->{
+                                    undoUnregisterMember(event, removedUser, promotedUser);
+                                })
+                        );
             }
             case WAITLIST -> {
+                int indexRemovedUser = event.getWaitList().indexOf(removedUser);
                 event.getWaitList().removeIf(user -> user.getId() == idUser);
+                System.out.println();
+                actionHistoryService.push(
+                        new Action("Вернуть пользователя id="+ idUser+" в лист ожидания?",
+                        () -> event.getWaitList().add(indexRemovedUser,removedUser)));
             }
             case NOT_REGISTERED -> {
                 throw new UserNotRegisteredException("Этот пользователь не зарегистрирован на мероприятие");
             }
         }
         eventRepository.save(event);
+    }
+
+    private void undoUnregisterMember(Event event, User removedUser, User promotedUser) {
+        if (promotedUser != null){
+            boolean promotedWasMembers = event.getMembers().removeIf(user -> user.getId() == promotedUser.getId());
+            if (promotedWasMembers){
+                event.getWaitList().addFirst(promotedUser);
+            }
+        }
+        event.getMembers().add(removedUser);
     }
 
     public Event getEventById(int idEvent) {
@@ -133,7 +167,6 @@ public class EventService {
     public Optional<Event> findEventById(int idEvent) {
         return eventRepository.findById(idEvent);
     }
-
 
     public StatusRegistration getStatusRegistration(Event event, int idUser) {
         if (event.getMembers().stream().anyMatch((user) -> user.getId() == idUser)) {

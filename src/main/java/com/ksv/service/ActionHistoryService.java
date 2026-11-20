@@ -14,12 +14,24 @@ public class ActionHistoryService {
         history.push(action);
     }
 
-    public void undoLastAction(){
+    public boolean existsLastAction(){
+        return history.size()>0;
+    }
+
+    public String undoLastAction(){
         Action action = history.pollFirst();
         if (action == null){
             throw new NoActionToUndoException("В истории нет действия для отмены");
         }
-        action.undo();
+        return action.undo();
+    }
+
+    public String getDescriptionLastAction(){
+        return history.peekFirst().getDescription();
+    }
+
+    public void printHistory(){
+        history.forEach(action -> System.out.println(action.getDescription()));
     }
 
 

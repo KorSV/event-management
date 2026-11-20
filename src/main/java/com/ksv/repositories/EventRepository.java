@@ -26,5 +26,9 @@ public class EventRepository {
         return event;
     }
 
+    public Optional<Event> delete(int id){
+       return Optional.ofNullable(events.remove(id));
+    }
+
 
 }

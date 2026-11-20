@@ -2,6 +2,7 @@ plugins {
     id("java")
     java
     checkstyle
+    jacoco
 }
 
 group = "com.ksv"
@@ -24,6 +25,19 @@ checkstyle {
     maxWarnings = 0 // не допускаем предупреждений
 }
 
+jacoco {
+    toolVersion= "0.8.15"
+}
+
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // Тесты должны быть выполнены до отчёта
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }

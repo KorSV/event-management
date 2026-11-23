@@ -21,23 +21,23 @@ public class ActionHistoryViewTest {
     private LocalDateTime validStart;
 
     @BeforeEach
-    void init(){
+    void init() {
         EventRepository eventRepository = new EventRepository();
         UserRepository userRepository = new UserRepository();
         userService = new UserService(userRepository);
         actionHistoryService = new ActionHistoryService();
-        eventService = new EventService(eventRepository, userService,actionHistoryService);
+        eventService = new EventService(eventRepository, userService, actionHistoryService);
         validStart = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0).withSecond(0).withNano(0);
     }
 
     @Test
-    void undoUnregisterMember_shouldAddRemovedUserToMembers_whenWaitListWasEmpty(){
+    void undoUnregisterMember_shouldAddRemovedUserToMembers_whenWaitListWasEmpty() {
         User user1 = userService.createUser("user1");
         User user2 = userService.createUser("user2");
         Event event = eventService.createEvent("event", validStart, 10);
         eventService.registerMember(event.getId(), user1.getId());
         eventService.registerMember(event.getId(), user2.getId());
-        assertThat(event.getMembers()).extracting(User::getName).containsExactlyInAnyOrder("user1","user2");
+        assertThat(event.getMembers()).extracting(User::getName).containsExactlyInAnyOrder("user1", "user2");
         eventService.unregisterMember(event.getId(), user1.getId());
         assertThat(event.getMembers()).extracting(User::getName).containsExactlyInAnyOrder("user2");
         actionHistoryService.undoLastAction();
@@ -45,7 +45,7 @@ public class ActionHistoryViewTest {
     }
 
     @Test
-    void undoUnregisterMember_shouldAddRemovedUserToMembersAndAddPromotedUserToWaitList_whenWaitListWasNotEmpty(){
+    void undoUnregisterMember_shouldAddRemovedUserToMembersAndAddPromotedUserToWaitList_whenWaitListWasNotEmpty() {
         User user1 = userService.createUser("user1");
         User user2 = userService.createUser("user2");
         User user3 = userService.createUser("user3");
@@ -66,19 +66,23 @@ public class ActionHistoryViewTest {
         assertThat(event).satisfies(e -> {
             assertThat(e.getMembers())
                     .extracting(User::getName)
-                    .containsExactlyInAnyOrder("user2", "user3","user4","user5","userInWaitList1");
+                    .containsExactlyInAnyOrder("user2", "user3", "user4", "user5", "userInWaitList1");
             assertThat(e.getWaitList()).extracting(User::getName).containsExactly("userInWaitList2");
         });
         actionHistoryService.undoLastAction();
         assertThat(event).satisfies(e -> {
-            assertThat(e.getMembers()).extracting(User::getName).containsExactlyInAnyOrder("user1","user2","user3","user4","user5");
-            assertThat(e.getWaitList()).extracting(User::getName).containsExactly("userInWaitList1","userInWaitList2");
+            assertThat(e.getMembers())
+                    .extracting(User::getName)
+                    .containsExactlyInAnyOrder("user1", "user2", "user3", "user4", "user5");
+            assertThat(e.getWaitList())
+                    .extracting(User::getName)
+                    .containsExactly("userInWaitList1", "userInWaitList2");
         });
 
     }
 
     @Test
-    void undoUnregisterMember_shouldAddRemovedUserToWaitList_whenUserWasOnWaitList(){
+    void undoUnregisterMember_shouldAddRemovedUserToWaitList_whenUserWasOnWaitList() {
         User user1 = userService.createUser("user1");
         User user2 = userService.createUser("user2");
         User user3 = userService.createUser("user3");
@@ -100,23 +104,23 @@ public class ActionHistoryViewTest {
                 .containsExactly("userInWaitList1", "userInWaitList2");
         eventService.unregisterMember(idEvent, userInWaitList1.getId());
         assertThat(event).satisfies(e -> {
-           assertThat(e.getMembers()).extracting(User::getName)
-                   .containsExactlyInAnyOrder("user1","user2","user3","user4","user5");
-           assertThat(e.getWaitList()).extracting(User::getName)
-                   .containsExactly("userInWaitList2");
+            assertThat(e.getMembers()).extracting(User::getName)
+                    .containsExactlyInAnyOrder("user1", "user2", "user3", "user4", "user5");
+            assertThat(e.getWaitList()).extracting(User::getName)
+                    .containsExactly("userInWaitList2");
         });
         actionHistoryService.undoLastAction();
         assertThat(event.getWaitList()).extracting(User::getName)
-                .containsExactly("userInWaitList1","userInWaitList2");
+                .containsExactly("userInWaitList1", "userInWaitList2");
     }
 
     @Test
-    void undoCreateEvent_shouldRemoveEvent_whenEventExists(){
+    void undoCreateEvent_shouldRemoveEvent_whenEventExists() {
         Event event1 = eventService.createEvent("event1", validStart, 5);
         Event event2 = eventService.createEvent("event2", validStart, 5);
         assertThat(eventService.getEvents())
                 .extracting(Event::getName)
-                        .containsExactlyInAnyOrder("event1","event2");
+                .containsExactlyInAnyOrder("event1", "event2");
         actionHistoryService.undoLastAction();
         assertThat(eventService.getEvents())
                 .extracting(Event::getName)
@@ -125,28 +129,28 @@ public class ActionHistoryViewTest {
 
 
     @Test
-    void undoCancelEvent_shouldRestoreActualStatusEvent_whenEventExists(){
+    void undoCancelEvent_shouldRestoreActualStatusEvent_whenEventExists() {
         Event event = eventService.createEvent("event", validStart, 5);
         assertThat(eventService.getEventById(event.getId()))
                 .extracting(Event::getName)
                 .isEqualTo("event");
         eventService.cancelEvent(event.getId());
         assertThat(eventService.getEventById(event.getId()))
-                .extracting(Event::getName,Event::getStatus)
-                        .containsExactly("event", StatusEvent.ARCHIVE);
+                .extracting(Event::getName, Event::getStatus)
+                .containsExactly("event", StatusEvent.ARCHIVE);
         actionHistoryService.undoLastAction();
         assertThat(eventService.getEvents())
                 .satisfies(events -> {
-                   assertThat(events)
-                           .hasSize(1);
-                   assertThat(events)
-                           .extracting(Event::getName,Event::getStatus)
-                           .containsExactly(tuple("event",StatusEvent.ACTUAL));
+                    assertThat(events)
+                            .hasSize(1);
+                    assertThat(events)
+                            .extracting(Event::getName, Event::getStatus)
+                            .containsExactly(tuple("event", StatusEvent.ACTUAL));
                 });
     }
 
     @Test
-    void undoRegisterMember_shouldRemoveFromMembers_whenUserWasAddInMembers(){
+    void undoRegisterMember_shouldRemoveFromMembers_whenUserWasAddInMembers() {
         User user1 = userService.createUser("user1");
         User user2 = userService.createUser("user2");
         Event event = eventService.createEvent("event", validStart, 5);
@@ -154,7 +158,7 @@ public class ActionHistoryViewTest {
         eventService.registerMember(event.getId(), user2.getId());
         assertThat(event.getMembers())
                 .extracting(User::getName)
-                .containsExactlyInAnyOrder("user1","user2");
+                .containsExactlyInAnyOrder("user1", "user2");
         actionHistoryService.undoLastAction();
         assertThat(event.getMembers())
                 .extracting(User::getName)
@@ -162,7 +166,7 @@ public class ActionHistoryViewTest {
     }
 
     @Test
-    void undoRegisterMember_shouldRemoveFromWaitList_whenUserWasAddInWaitList(){
+    void undoRegisterMember_shouldRemoveFromWaitList_whenUserWasAddInWaitList() {
         User user1 = userService.createUser("user1");
         User user2 = userService.createUser("user2");
         User user3 = userService.createUser("user3");
@@ -180,13 +184,13 @@ public class ActionHistoryViewTest {
         eventService.registerMember(idEvent, userInWaitList1.getId());
         eventService.registerMember(idEvent, userInWaitList2.getId());
         assertThat(event)
-                .satisfies(e ->{
-                   assertThat(e.getMembers())
-                           .extracting(User::getName)
-                           .containsExactlyInAnyOrder("user1","user2","user3","user4","user5");
-                   assertThat(e.getWaitList())
-                           .extracting(User::getName)
-                           .containsExactly("userInWaitList1","userInWaitList2");
+                .satisfies(e -> {
+                    assertThat(e.getMembers())
+                            .extracting(User::getName)
+                            .containsExactlyInAnyOrder("user1", "user2", "user3", "user4", "user5");
+                    assertThat(e.getWaitList())
+                            .extracting(User::getName)
+                            .containsExactly("userInWaitList1", "userInWaitList2");
 
                 });
         actionHistoryService.undoLastAction();
@@ -194,7 +198,7 @@ public class ActionHistoryViewTest {
                 .satisfies(e -> {
                     assertThat(e.getMembers())
                             .extracting(User::getName)
-                            .containsExactlyInAnyOrder("user1","user2","user3","user4","user5");
+                            .containsExactlyInAnyOrder("user1", "user2", "user3", "user4", "user5");
                     assertThat(e.getWaitList())
                             .extracting(User::getName)
                             .containsExactly("userInWaitList1");
@@ -205,7 +209,7 @@ public class ActionHistoryViewTest {
 
 
     @Test
-    void undoLastAction_shouldUndoOnlyLastAction_whenActionHistoryMoreThanOne(){
+    void undoLastAction_shouldUndoOnlyLastAction_whenActionHistoryMoreThanOne() {
         User user = userService.createUser("user");
         Event event = eventService.createEvent("event", validStart, 5);
         eventService.registerMember(event.getId(), user.getId());
@@ -219,7 +223,7 @@ public class ActionHistoryViewTest {
                 });
         actionHistoryService.undoLastAction();
         assertThat(eventService.getEventById(event.getId()))
-                .satisfies( e -> {
+                .satisfies(e -> {
                     assertThat(e.getStatus())
                             .isEqualTo(StatusEvent.ACTUAL);
                     assertThat(e.getMembers())
@@ -227,7 +231,6 @@ public class ActionHistoryViewTest {
                             .containsExactly("user");
                 });
     }
-
 
 
 }

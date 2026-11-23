@@ -10,27 +10,27 @@ import java.util.Deque;
 public class ActionHistoryService {
     private final Deque<Action> history = new ArrayDeque<>();
 
-    void push(Action action){
+    void push(Action action) {
         history.push(action);
     }
 
-    public boolean existsLastAction(){
-        return history.size()>0;
+    public boolean existsLastAction() {
+        return history.size() > 0;
     }
 
-    public String undoLastAction(){
+    public String undoLastAction() {
         Action action = history.pollFirst();
-        if (action == null){
+        if (action == null) {
             throw new NoActionToUndoException("В истории нет действия для отмены");
         }
         return action.undo();
     }
 
-    public String getDescriptionLastAction(){
+    public String getDescriptionLastAction() {
         return history.peekFirst().getDescription();
     }
 
-    public void printHistory(){
+    public void printHistory() {
         history.forEach(action -> System.out.println(action.getDescription()));
     }
 

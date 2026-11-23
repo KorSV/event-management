@@ -1,7 +1,7 @@
 package com.ksv.service;
 
-import com.ksv.exceptions.EventAlreadyArchivedException;
 import com.ksv.exceptions.CannotRegisterOnArchivedEventException;
+import com.ksv.exceptions.EventAlreadyArchivedException;
 import com.ksv.exceptions.EventNotFoundException;
 import com.ksv.exceptions.MemberAlreadyRegisterException;
 import com.ksv.exceptions.UserNotFoundException;
@@ -266,7 +266,7 @@ class EventServiceTest {
     }
 
     @Test
-    void getStatusRegistration_shouldReturnNOT_REGISTERED_whenUserNotRegistred(){
+    void getStatusRegistration_shouldReturnNOT_REGISTERED_whenUserNotRegistred() {
         Event event = eventService.createEvent("test event"
                 , LocalDateTime.now().plusDays(1)
                 , 10);
@@ -276,7 +276,7 @@ class EventServiceTest {
     }
 
     @Test
-    void getStatusRegistration_shouldReturnWAITLIST_whenUserInWaitList(){
+    void getStatusRegistration_shouldReturnWAITLIST_whenUserInWaitList() {
         Event event = eventService.createEvent("test event"
                 , LocalDateTime.now().plusDays(1)
                 , 5);
@@ -291,7 +291,7 @@ class EventServiceTest {
     }
 
     @Test
-    void getStatusRegistration_shouldReturnREGISTERED_whenUserIsRegistered(){
+    void getStatusRegistration_shouldReturnREGISTERED_whenUserIsRegistered() {
         Event event = eventService.createEvent("test event"
                 , LocalDateTime.now().plusDays(1)
                 , 10);

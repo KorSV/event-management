@@ -20,7 +20,10 @@ public class ConsoleApplication {
     private ActionHistoryView actionHistoryView;
     private boolean running;
 
-    public ConsoleApplication(EventView eventView, UserView userView, ActionHistoryView actionHistoryView, InputReader inputReader) {
+    public ConsoleApplication(EventView eventView,
+                              UserView userView,
+                              ActionHistoryView actionHistoryView,
+                              InputReader inputReader) {
         this.eventView = eventView;
         this.userView = userView;
         this.actionHistoryView = actionHistoryView;

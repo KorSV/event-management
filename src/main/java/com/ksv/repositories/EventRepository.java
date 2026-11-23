@@ -1,6 +1,7 @@
 package com.ksv.repositories;
 
 import com.ksv.model.Event;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Optional;
 
 public class EventRepository {
     private int nextId = 1;
-    private final Map<Integer,Event> events = new HashMap<>();
+    private final Map<Integer, Event> events = new HashMap<>();
 
     public Optional<Event> findById(int id) {
         return Optional.ofNullable(events.get(id));
@@ -26,8 +27,8 @@ public class EventRepository {
         return event;
     }
 
-    public Optional<Event> delete(int id){
-       return Optional.ofNullable(events.remove(id));
+    public Optional<Event> delete(int id) {
+        return Optional.ofNullable(events.remove(id));
     }
 
 

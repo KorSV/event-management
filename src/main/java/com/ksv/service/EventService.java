@@ -1,7 +1,7 @@
 package com.ksv.service;
 
-import com.ksv.exceptions.EventAlreadyArchivedException;
 import com.ksv.exceptions.CannotRegisterOnArchivedEventException;
+import com.ksv.exceptions.EventAlreadyArchivedException;
 import com.ksv.exceptions.EventNotFoundException;
 import com.ksv.exceptions.MemberAlreadyRegisterException;
 import com.ksv.exceptions.UserNotFoundException;
@@ -29,7 +29,9 @@ public class EventService {
     private final EventRepository eventRepository;
     private final ActionHistoryService actionHistoryService;
 
-    public EventService(EventRepository eventRepository,UserService userService, ActionHistoryService actionHistoryService) {
+    public EventService(EventRepository eventRepository,
+                        UserService userService,
+                        ActionHistoryService actionHistoryService) {
         this.eventRepository = eventRepository;
         this.userService = userService;
         this.actionHistoryService = actionHistoryService;
@@ -65,10 +67,12 @@ public class EventService {
         }
         Event savedEvent = eventRepository.save(new Event(name, startsAt, maxMembers));
         actionHistoryService.push(new Action(
-                "Отменить создание мероприятия id="+ savedEvent.getId(),
-                ()->{eventRepository.delete(savedEvent.getId()).orElseThrow(
-                        ()->new EventNotFoundException(
-                                "Нельзя отменить создание: мероприятие id="+savedEvent.getId()+" не найдено"));}
+                "Отменить создание мероприятия id=" + savedEvent.getId(),
+                () -> {
+                    eventRepository.delete(savedEvent.getId()).orElseThrow(
+                            () -> new EventNotFoundException(
+                                    "Нельзя отменить создание: мероприятие id=" + savedEvent.getId() + " не найдено"));
+                }
         ));
         return savedEvent;
     }
@@ -83,10 +87,12 @@ public class EventService {
         event.setStatus(StatusEvent.ARCHIVE);
         eventRepository.save(event);
         actionHistoryService.push(
-                new Action("Событие id="+idEvent+" ,было отменено. Хотите вернуть его?",
-                () -> {event.setStatus(StatusEvent.ACTUAL);
-                        eventRepository.save(event);}
-        ));
+                new Action("Событие id=" + idEvent + " ,было отменено. Хотите вернуть его?",
+                        () -> {
+                            event.setStatus(StatusEvent.ACTUAL);
+                            eventRepository.save(event);
+                        }
+                ));
         return event;
     }
 
@@ -106,11 +112,12 @@ public class EventService {
         }
         eventRepository.save(event);
         actionHistoryService.push(
-                new Action("Отменить регистрацию пользователя id="+idUser+" на мероприятие id="+idEvent+"?",
-                () -> {event.getMembers().removeIf(u -> u.getId() == user.getId());
-                event.getWaitList().removeIf(u -> u.getId() == user.getId());
-                eventRepository.save(event);
-        }));
+                new Action("Отменить регистрацию пользователя id=" + idUser + " на мероприятие id=" + idEvent + "?",
+                        () -> {
+                            event.getMembers().removeIf(u -> u.getId() == user.getId());
+                            event.getWaitList().removeIf(u -> u.getId() == user.getId());
+                            eventRepository.save(event);
+                        }));
     }
 
     public void unregisterMember(int idEvent, int idUser) {
@@ -128,19 +135,19 @@ public class EventService {
                     event.getMembers().add(promotedUser);
                 }
                 actionHistoryService.push(
-                        new Action("отменить отмену регистрации пользователя id=?"+idUser,
-                                ()->{
+                        new Action("отменить отмену регистрации пользователя id=?" + idUser,
+                                () -> {
                                     undoUnregisterMember(event, removedUser, promotedUser);
                                 })
-                        );
+                );
             }
             case WAITLIST -> {
                 int indexRemovedUser = event.getWaitList().indexOf(removedUser);
                 event.getWaitList().removeIf(user -> user.getId() == idUser);
                 System.out.println();
                 actionHistoryService.push(
-                        new Action("Вернуть пользователя id="+ idUser+" в лист ожидания?",
-                        () -> event.getWaitList().add(indexRemovedUser,removedUser)));
+                        new Action("Вернуть пользователя id=" + idUser + " в лист ожидания?",
+                                () -> event.getWaitList().add(indexRemovedUser, removedUser)));
             }
             case NOT_REGISTERED -> {
                 throw new UserNotRegisteredException("Этот пользователь не зарегистрирован на мероприятие");
@@ -150,9 +157,9 @@ public class EventService {
     }
 
     private void undoUnregisterMember(Event event, User removedUser, User promotedUser) {
-        if (promotedUser != null){
+        if (promotedUser != null) {
             boolean promotedWasMembers = event.getMembers().removeIf(user -> user.getId() == promotedUser.getId());
-            if (promotedWasMembers){
+            if (promotedWasMembers) {
                 event.getWaitList().addFirst(promotedUser);
             }
         }

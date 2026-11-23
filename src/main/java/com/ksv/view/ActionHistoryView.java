@@ -14,7 +14,7 @@ public class ActionHistoryView {
 
     public void undoActionHandler() {
         try {
-            if (actionHistoryService.existsLastAction()){
+            if (actionHistoryService.existsLastAction()) {
                 String requestCancelMessage = inputReader
                         .getString(actionHistoryService.getDescriptionLastAction() + " (Y/N): ");
                 if (requestCancelMessage.toUpperCase().equals("Y")) {
@@ -22,14 +22,14 @@ public class ActionHistoryView {
                     System.out.println("Мероприятие отменено!");
                 } else if (requestCancelMessage.toUpperCase().equals("N")) {
                     return;
-                }else{
+                } else {
                     System.out.println("Введите правильное значение либо Y либо N");
                     undoActionHandler();
                 }
-            }else{
+            } else {
                 System.out.println("В истории нет операций для отмены");
             }
-        }catch (NoActionToUndoException e){
+        } catch (NoActionToUndoException e) {
             System.out.println("Ошибка: " + e.getMessage());
         }
     }

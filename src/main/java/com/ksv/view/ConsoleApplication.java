@@ -46,7 +46,7 @@ public class ConsoleApplication {
         this.running = true;
         while (running) {
             menu.show();
-            handleChoice(inputReader.getInt("Выберите пункт меню: "));
+            handleChoice(inputReader.getInt("Выберите пожалуйста пункт меню: "));
         }
     }
 

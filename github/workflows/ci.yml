@@ -1,0 +1,16 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+  build: # Название джобы (работы)
+    runs-on: ubuntu-latest # На какой ОС запускать
+    steps:
+      - uses: actions/checkout@v4 # Склонировать твой код
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build with Gradle
+        run: ./gradlew build # Запустить сборку

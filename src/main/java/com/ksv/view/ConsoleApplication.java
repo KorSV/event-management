@@ -52,7 +52,7 @@ public class ConsoleApplication {
 
     private void stop() {
         this.running = false;
-        System.out.println("До свидания!");
+        System.out.println("До свидания!!!");
     }
 
     private void handleChoice(int choice) {

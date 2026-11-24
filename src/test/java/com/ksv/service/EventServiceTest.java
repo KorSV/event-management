@@ -28,8 +28,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EventServiceTest {
 
-    private EventRepository eventRepository;
-    private UserRepository userRepository;
     private EventService eventService;
     private UserService userService;
     private ActionHistoryService actionHistoryService;
@@ -37,8 +35,8 @@ class EventServiceTest {
 
     @BeforeEach
     void init() {
-        this.eventRepository = new EventRepository();
-        this.userRepository = new UserRepository();
+        EventRepository eventRepository = new EventRepository();
+        UserRepository userRepository = new UserRepository();
         this.userService = new UserService(userRepository);
         this.actionHistoryService = new ActionHistoryService();
         this.eventService = new EventService(eventRepository, userService, actionHistoryService);

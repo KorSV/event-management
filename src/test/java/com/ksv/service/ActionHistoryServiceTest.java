@@ -249,7 +249,7 @@ public class ActionHistoryServiceTest {
     }
 
     @Test
-    void undoLastAction_shouldThrow_whenActionHistoryIsEmpty(){
+    void undoLastAction_shouldThrow_whenActionHistoryIsEmpty() {
         assertThat(actionHistoryService.existsLastAction()).isFalse();
         assertThatThrownBy( () -> actionHistoryService.undoLastAction())
                 .isInstanceOf(NoActionToUndoException.class)
@@ -265,7 +265,7 @@ public class ActionHistoryServiceTest {
     }
 
     @Test
-    void test(){
+    void test() {
         Event event = eventService.createEvent("event", validStart, 5);
         eventRepository.delete(event.getId());
         assertThat(actionHistoryService.existsLastAction()).isTrue();

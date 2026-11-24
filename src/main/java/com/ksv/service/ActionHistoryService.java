@@ -30,9 +30,6 @@ public class ActionHistoryService {
         return history.peekFirst().getDescription();
     }
 
-    public void printHistory() {
-        history.forEach(action -> System.out.println(action.getDescription()));
-    }
 
 
 }

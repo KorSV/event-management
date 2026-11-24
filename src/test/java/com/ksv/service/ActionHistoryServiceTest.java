@@ -1,5 +1,7 @@
 package com.ksv.service;
 
+import com.ksv.exceptions.EventNotFoundException;
+import com.ksv.exceptions.NoActionToUndoException;
 import com.ksv.model.Event;
 import com.ksv.model.StatusEvent;
 import com.ksv.model.User;
@@ -11,18 +13,20 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
-public class ActionHistoryViewTest {
+public class ActionHistoryServiceTest {
 
     private EventService eventService;
+    private EventRepository eventRepository;
     private UserService userService;
     private ActionHistoryService actionHistoryService;
     private LocalDateTime validStart;
 
     @BeforeEach
     void init() {
-        EventRepository eventRepository = new EventRepository();
+        eventRepository = new EventRepository();
         UserRepository userRepository = new UserRepository();
         userService = new UserService(userRepository);
         actionHistoryService = new ActionHistoryService();
@@ -233,4 +237,42 @@ public class ActionHistoryViewTest {
     }
 
 
+    @Test
+    void existsLastAction_shouldReturnTrue_whenLastActionNotEmpty() {
+        eventService.createEvent("event", validStart, 5);
+        assertThat(actionHistoryService.existsLastAction()).isTrue();
+    }
+
+    @Test
+    void existsLastAction_shouldReturnFalse_whenLastActionIsEmpty() {
+        assertThat(actionHistoryService.existsLastAction()).isFalse();
+    }
+
+    @Test
+    void undoLastAction_shouldThrow_whenActionHistoryIsEmpty(){
+        assertThat(actionHistoryService.existsLastAction()).isFalse();
+        assertThatThrownBy( () -> actionHistoryService.undoLastAction())
+                .isInstanceOf(NoActionToUndoException.class)
+                .hasMessageContaining("В истории нет действия для отмены");
+    }
+
+    @Test
+    void getDescriptionLastAction_shouldReturnDescription_whenLastActionExists() {
+        Event event = eventService.createEvent("event", validStart, 5);
+        assertThat(actionHistoryService.existsLastAction()).isTrue();
+        assertThat(actionHistoryService.getDescriptionLastAction())
+                .isEqualTo(String.format("Отменить создание мероприятия id=%s", event.getId()));
+    }
+
+    @Test
+    void test(){
+        Event event = eventService.createEvent("event", validStart, 5);
+        eventRepository.delete(event.getId());
+        assertThat(actionHistoryService.existsLastAction()).isTrue();
+        assertThatThrownBy( () -> actionHistoryService.undoLastAction())
+                .isInstanceOf(EventNotFoundException.class)
+                .hasMessageContaining(
+                        String.format(
+                                "Нельзя отменить создание: мероприятие id=%s не найдено",event.getId()));
+    }
 }

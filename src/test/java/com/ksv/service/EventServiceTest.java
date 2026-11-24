@@ -54,10 +54,10 @@ class EventServiceTest {
     @Test
     void getEvents_shouldReturnEventList_whenEventsExist() {
         eventService.createEvent("event1"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         eventService.createEvent("event2"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         assertThat(eventService.getEvents()).extracting(Event::getName)
                 .containsExactly("event1", "event2");

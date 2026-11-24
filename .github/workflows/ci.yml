@@ -29,12 +29,12 @@ jobs:
         run: ./gradlew test
       - name: Generate JaCoCo Report
         run: ./gradlew jacocoTestReport
-      - name: Upload jacoco report
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Deploy JaCoCo Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          name: jacoco-report
-          path: ./build/reports/jacoco/test/html
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/reports/jacoco/test/html/  # Путь к HTML-отчёту
+          destination_dir: coverage  # Разместить в подкаталоге /coverage, чтобы не затронуть другое содержимое
   build:
     runs-on: ubuntu-latest
     steps:

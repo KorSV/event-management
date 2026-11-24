@@ -141,6 +141,17 @@ class EventServiceTest {
     }
 
     @Test
+    void canselEvent_shouldThrow_whenEventNotExists(){
+        assertThatThrownBy( () -> eventService.getEventById(999))
+                .isInstanceOf(EventNotFoundException.class)
+                        .hasMessageContaining("Мероприятие с id= 999 не существует.");
+        assertThatThrownBy( () -> eventService.cancelEvent(999))
+                .isInstanceOf(EventNotFoundException.class)
+                .hasMessageContaining("Мероприятие с ID=999 не найдено");
+
+    }
+
+    @Test
     void registerMember_shouldAddUserToEventMember() {
         Event event = eventService.createEvent("test event"
                 , validStart

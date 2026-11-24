@@ -15,24 +15,21 @@ import java.util.Deque;
 <span class="fc" id="L15">    }</span>
 
     public boolean existsLastAction() {
-<span class="nc bnc" id="L18" title="All 2 branches missed.">        return history.size() &gt; 0;</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">        return history.size() &gt; 0;</span>
     }
 
     public String undoLastAction() {
 <span class="fc" id="L22">        Action action = history.pollFirst();</span>
-<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if (action == null) {</span>
-<span class="nc" id="L24">            throw new NoActionToUndoException(&quot;В истории нет действия для отмены&quot;);</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (action == null) {</span>
+<span class="fc" id="L24">            throw new NoActionToUndoException(&quot;В истории нет действия для отмены&quot;);</span>
         }
 <span class="fc" id="L26">        return action.undo();</span>
     }
 
     public String getDescriptionLastAction() {
-<span class="nc" id="L30">        return history.peekFirst().getDescription();</span>
+<span class="fc" id="L30">        return history.peekFirst().getDescription();</span>
     }
 
-    public void printHistory() {
-<span class="nc" id="L34">        history.forEach(action -&gt; System.out.println(action.getDescription()));</span>
-<span class="nc" id="L35">    }</span>
 
 
 }

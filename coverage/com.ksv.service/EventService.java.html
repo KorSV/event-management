@@ -70,8 +70,8 @@ public class EventService {
 <span class="fc" id="L70">                &quot;Отменить создание мероприятия id=&quot; + savedEvent.getId(),</span>
                 () -&gt; {
 <span class="fc" id="L72">                    eventRepository.delete(savedEvent.getId()).orElseThrow(</span>
-<span class="nc" id="L73">                            () -&gt; new EventNotFoundException(</span>
-<span class="nc" id="L74">                                    &quot;Нельзя отменить создание: мероприятие id=&quot; + savedEvent.getId() + &quot; не найдено&quot;));</span>
+<span class="fc" id="L73">                            () -&gt; new EventNotFoundException(</span>
+<span class="fc" id="L74">                                    &quot;Нельзя отменить создание: мероприятие id=&quot; + savedEvent.getId() + &quot; не найдено&quot;));</span>
 <span class="fc" id="L75">                }</span>
         ));
 <span class="fc" id="L77">        return savedEvent;</span>

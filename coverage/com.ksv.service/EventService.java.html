@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java-roadmap</a> &gt; <a href="index.source.html" class="el_package">com.ksv.service</a> &gt; <span class="el_source">EventService.java</span></div><h1>EventService.java</h1><pre class="source lang-java linenums">package com.ksv.service;
+
+import com.ksv.exceptions.CannotRegisterOnArchivedEventException;
+import com.ksv.exceptions.EventAlreadyArchivedException;
+import com.ksv.exceptions.EventNotFoundException;
+import com.ksv.exceptions.MemberAlreadyRegisterException;
+import com.ksv.exceptions.UserNotFoundException;
+import com.ksv.exceptions.UserNotRegisteredException;
+import com.ksv.exceptions.ValidationException;
+import com.ksv.model.Action;
+import com.ksv.model.Event;
+import com.ksv.model.StatusEvent;
+import com.ksv.model.StatusRegistration;
+import com.ksv.model.User;
+import com.ksv.repositories.EventRepository;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+public class EventService {
+
+    private static final int MIN_MEMBERS_LIMIT = 5;
+    private static final int MAX_MEMBERS_LIMIT = 1000;
+<span class="fc" id="L26">    private static final LocalTime EVENT_START_MIN = LocalTime.of(9, 0);</span>
+<span class="fc" id="L27">    private static final LocalTime EVENT_START_MAX = LocalTime.of(20, 0);</span>
+    private final UserService userService;
+    private final EventRepository eventRepository;
+    private final ActionHistoryService actionHistoryService;
+
+    public EventService(EventRepository eventRepository,
+                        UserService userService,
+<span class="fc" id="L34">                        ActionHistoryService actionHistoryService) {</span>
+<span class="fc" id="L35">        this.eventRepository = eventRepository;</span>
+<span class="fc" id="L36">        this.userService = userService;</span>
+<span class="fc" id="L37">        this.actionHistoryService = actionHistoryService;</span>
+<span class="fc" id="L38">    }</span>
+
+    public List&lt;Event&gt; getEvents() {
+<span class="fc" id="L41">        return eventRepository.findAll();</span>
+    }
+
+    public Event createEvent(String name, LocalDateTime startsAt, int maxMembers) {
+        /* validation block*/
+<span class="fc bfc" id="L46" title="All 4 branches covered.">        if (name == null || name.isBlank()) {</span>
+<span class="fc" id="L47">            throw new ValidationException(&quot;Поле наименование мероприятия не может быть пустым&quot;);</span>
+        }
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (maxMembers &lt; MIN_MEMBERS_LIMIT) {</span>
+<span class="fc" id="L50">            throw new ValidationException(String.format(</span>
+                    &quot;Максимальное количество участников мероприятия не может быть меньше %s&quot;,
+<span class="fc" id="L52">                    MIN_MEMBERS_LIMIT));</span>
+        }
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (maxMembers &gt; MAX_MEMBERS_LIMIT) {</span>
+<span class="fc" id="L55">            throw new ValidationException(String.format(</span>
+                    &quot;Максимальное количество участников мероприятия не может быть больше %s&quot;,
+<span class="fc" id="L57">                    MAX_MEMBERS_LIMIT));</span>
+        }
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (startsAt.isBefore(LocalDateTime.now())) {</span>
+<span class="fc" id="L60">            throw new ValidationException(&quot;Введенная вами дата мероприятия уже прошла&quot;);</span>
+        }
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">        if (startsAt.toLocalTime().isBefore(EVENT_START_MIN) || startsAt.toLocalTime().isAfter(EVENT_START_MAX)) {</span>
+<span class="fc" id="L63">            throw new ValidationException(String.format(</span>
+                    &quot;Мероприятия могут проходить только в рабочее время c %s - %s&quot;,
+                    EVENT_START_MIN,
+                    EVENT_START_MAX));
+        }
+<span class="fc" id="L68">        Event savedEvent = eventRepository.save(new Event(name, startsAt, maxMembers));</span>
+<span class="fc" id="L69">        actionHistoryService.push(new Action(</span>
+<span class="fc" id="L70">                &quot;Отменить создание мероприятия id=&quot; + savedEvent.getId(),</span>
+                () -&gt; {
+<span class="fc" id="L72">                    eventRepository.delete(savedEvent.getId()).orElseThrow(</span>
+<span class="nc" id="L73">                            () -&gt; new EventNotFoundException(</span>
+<span class="nc" id="L74">                                    &quot;Нельзя отменить создание: мероприятие id=&quot; + savedEvent.getId() + &quot; не найдено&quot;));</span>
+<span class="fc" id="L75">                }</span>
+        ));
+<span class="fc" id="L77">        return savedEvent;</span>
+    }
+
+    public Event cancelEvent(int idEvent) {
+<span class="fc" id="L81">        Event event = findEventById(idEvent)</span>
+<span class="pc" id="L82">                .orElseThrow(() -&gt; new EventNotFoundException(</span>
+                        &quot;Мероприятие с ID=&quot; + idEvent + &quot; не найдено&quot;));
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (event.getStatus() == StatusEvent.ARCHIVE) {</span>
+<span class="fc" id="L85">            throw new EventAlreadyArchivedException(&quot;Мероприятие id=&quot; + event.getId() + &quot; уже находится в архиве.&quot;);</span>
+        }
+<span class="fc" id="L87">        event.setStatus(StatusEvent.ARCHIVE);</span>
+<span class="fc" id="L88">        eventRepository.save(event);</span>
+<span class="fc" id="L89">        actionHistoryService.push(</span>
+                new Action(&quot;Событие id=&quot; + idEvent + &quot; ,было отменено. Хотите вернуть его?&quot;,
+                        () -&gt; {
+<span class="fc" id="L92">                            event.setStatus(StatusEvent.ACTUAL);</span>
+<span class="fc" id="L93">                            eventRepository.save(event);</span>
+<span class="fc" id="L94">                        }</span>
+                ));
+<span class="fc" id="L96">        return event;</span>
+    }
+
+    public void registerMember(int idEvent, int idUser) {
+<span class="fc" id="L100">        Event event = getEventById(idEvent);</span>
+<span class="fc" id="L101">        User user = userService.getUserById(idUser);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (event.getStatus() == StatusEvent.ARCHIVE) {</span>
+<span class="fc" id="L103">            throw new CannotRegisterOnArchivedEventException(&quot;Нельзя записаться на архивное мероприятие&quot;);</span>
+        }
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (getStatusRegistration(event, idUser) != StatusRegistration.NOT_REGISTERED) {</span>
+<span class="fc" id="L106">            throw new MemberAlreadyRegisterException(&quot;Этот участник уже зарегистрирован на это мероприятие&quot;);</span>
+        }
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        if (event.getMembers().size() == event.getMaxMembers()) {</span>
+<span class="fc" id="L109">            event.getWaitList().offer(user);</span>
+        } else {
+<span class="fc" id="L111">            event.getMembers().add(user);</span>
+        }
+<span class="fc" id="L113">        eventRepository.save(event);</span>
+<span class="fc" id="L114">        actionHistoryService.push(</span>
+                new Action(&quot;Отменить регистрацию пользователя id=&quot; + idUser + &quot; на мероприятие id=&quot; + idEvent + &quot;?&quot;,
+                        () -&gt; {
+<span class="fc bfc" id="L117" title="All 2 branches covered.">                            event.getMembers().removeIf(u -&gt; u.getId() == user.getId());</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">                            event.getWaitList().removeIf(u -&gt; u.getId() == user.getId());</span>
+<span class="fc" id="L119">                            eventRepository.save(event);</span>
+<span class="fc" id="L120">                        }));</span>
+<span class="fc" id="L121">    }</span>
+
+    public void unregisterMember(int idEvent, int idUser) {
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (userService.findUserById(idUser).isEmpty()) {</span>
+<span class="fc" id="L125">            throw new UserNotFoundException(&quot;Пользователь id=&quot; + idUser + &quot; не существует&quot;);</span>
+        }
+<span class="fc" id="L127">        Event event = getEventById(idEvent);</span>
+<span class="fc" id="L128">        User removedUser = userService.getUserById(idUser);</span>
+<span class="pc bpc" id="L129" title="1 of 4 branches missed.">        switch (getStatusRegistration(event, idUser)) {</span>
+            case REGISTERED -&gt; {
+<span class="fc" id="L131">                User promotedUser = event.getWaitList().poll();</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">                event.getMembers().removeIf(user -&gt; user.getId() == idUser);</span>
+                //User member = event.getWaitList().poll();
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                if (promotedUser != null) {</span>
+<span class="fc" id="L135">                    event.getMembers().add(promotedUser);</span>
+                }
+<span class="fc" id="L137">                actionHistoryService.push(</span>
+                        new Action(&quot;отменить отмену регистрации пользователя id=?&quot; + idUser,
+                                () -&gt; {
+<span class="fc" id="L140">                                    undoUnregisterMember(event, removedUser, promotedUser);</span>
+<span class="fc" id="L141">                                })</span>
+                );
+<span class="fc" id="L143">            }</span>
+            case WAITLIST -&gt; {
+<span class="fc" id="L145">                int indexRemovedUser = event.getWaitList().indexOf(removedUser);</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">                event.getWaitList().removeIf(user -&gt; user.getId() == idUser);</span>
+<span class="fc" id="L147">                System.out.println();</span>
+<span class="fc" id="L148">                actionHistoryService.push(</span>
+                        new Action(&quot;Вернуть пользователя id=&quot; + idUser + &quot; в лист ожидания?&quot;,
+<span class="fc" id="L150">                                () -&gt; event.getWaitList().add(indexRemovedUser, removedUser)));</span>
+<span class="fc" id="L151">            }</span>
+            case NOT_REGISTERED -&gt; {
+<span class="fc" id="L153">                throw new UserNotRegisteredException(&quot;Этот пользователь не зарегистрирован на мероприятие&quot;);</span>
+            }
+        }
+<span class="fc" id="L156">        eventRepository.save(event);</span>
+<span class="fc" id="L157">    }</span>
+
+    private void undoUnregisterMember(Event event, User removedUser, User promotedUser) {
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (promotedUser != null) {</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">            boolean promotedWasMembers = event.getMembers().removeIf(user -&gt; user.getId() == promotedUser.getId());</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">            if (promotedWasMembers) {</span>
+<span class="fc" id="L163">                event.getWaitList().addFirst(promotedUser);</span>
+            }
+        }
+<span class="fc" id="L166">        event.getMembers().add(removedUser);</span>
+<span class="fc" id="L167">    }</span>
+
+    public Event getEventById(int idEvent) {
+<span class="fc" id="L170">        return eventRepository.findById(idEvent)</span>
+<span class="fc" id="L171">                .orElseThrow(() -&gt; new EventNotFoundException(&quot;Мероприятие с id= &quot; + idEvent + &quot; не существует.&quot;));</span>
+    }
+
+    public Optional&lt;Event&gt; findEventById(int idEvent) {
+<span class="fc" id="L175">        return eventRepository.findById(idEvent);</span>
+    }
+
+    public StatusRegistration getStatusRegistration(Event event, int idUser) {
+<span class="fc bfc" id="L179" title="All 4 branches covered.">        if (event.getMembers().stream().anyMatch((user) -&gt; user.getId() == idUser)) {</span>
+<span class="fc" id="L180">            return StatusRegistration.REGISTERED;</span>
+<span class="fc bfc" id="L181" title="All 4 branches covered.">        } else if (event.getWaitList().stream().anyMatch((user) -&gt; user.getId() == idUser)) {</span>
+<span class="fc" id="L182">            return StatusRegistration.WAITLIST;</span>
+        }
+<span class="fc" id="L184">        return StatusRegistration.NOT_REGISTERED;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

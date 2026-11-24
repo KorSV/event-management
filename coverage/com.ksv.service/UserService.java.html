@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java-roadmap</a> &gt; <a href="index.source.html" class="el_package">com.ksv.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.ksv.service;
+
+import com.ksv.exceptions.UserNotFoundException;
+import com.ksv.exceptions.ValidationException;
+import com.ksv.model.User;
+import com.ksv.repositories.UserRepository;
+import java.util.List;
+import java.util.Optional;
+
+public class UserService {
+
+    private final UserRepository userRepository;
+    private static final int MIN_LENGTH_USERNAME = 3;
+
+
+<span class="fc" id="L16">    public UserService(UserRepository userRepository) {</span>
+<span class="fc" id="L17">        this.userRepository = userRepository;</span>
+<span class="fc" id="L18">    }</span>
+
+    public List&lt;User&gt; getUsers() {
+<span class="fc" id="L21">        return userRepository.findAll();</span>
+    }
+
+    public User getUserById(int id) {
+<span class="fc" id="L25">        return userRepository.findById(id)</span>
+<span class="fc" id="L26">                .orElseThrow(() -&gt; new UserNotFoundException(&quot;Пользователь с id= &quot; + id + &quot; не существует.&quot;));</span>
+    }
+
+    public Optional&lt;User&gt; findUserById(int id) {
+<span class="fc" id="L30">        return userRepository.findById(id);</span>
+    }
+
+    public User createUser(String name) {
+<span class="fc bfc" id="L34" title="All 4 branches covered.">        if (name == null || name.isBlank()) {</span>
+<span class="fc" id="L35">            throw new ValidationException(&quot;Поле имя не может быть пустым&quot;);</span>
+        }
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (name.length() &lt; MIN_LENGTH_USERNAME) {</span>
+<span class="fc" id="L38">            throw new ValidationException(String.format(</span>
+                    &quot;Имя пользователя не может быть меньше %d символов&quot;,
+<span class="fc" id="L40">                    MIN_LENGTH_USERNAME));</span>
+        }
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (userRepository.existsByName(name)) {</span>
+<span class="fc" id="L43">            throw new ValidationException(&quot;Пользователь с таким именем уже существует. Попробуйте другое имя&quot;);</span>
+        }
+<span class="fc" id="L45">        return userRepository.save(new User(name));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

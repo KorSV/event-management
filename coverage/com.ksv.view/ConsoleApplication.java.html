@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsoleApplication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java-roadmap</a> &gt; <a href="index.source.html" class="el_package">com.ksv.view</a> &gt; <span class="el_source">ConsoleApplication.java</span></div><h1>ConsoleApplication.java</h1><pre class="source lang-java linenums">package com.ksv.view;
+
+
+import static com.ksv.view.ItemMenu.ADD_EVENT;
+import static com.ksv.view.ItemMenu.ADD_USER;
+import static com.ksv.view.ItemMenu.CANCEL_EVENT;
+import static com.ksv.view.ItemMenu.EVENT_DETAILS;
+import static com.ksv.view.ItemMenu.EXIT;
+import static com.ksv.view.ItemMenu.REGISTER_MEMBER;
+import static com.ksv.view.ItemMenu.SHOW_EVENTS;
+import static com.ksv.view.ItemMenu.SHOW_USERS;
+import static com.ksv.view.ItemMenu.UNDO_ACTION;
+import static com.ksv.view.ItemMenu.UNREGISTER_MEMBER;
+
+public class ConsoleApplication {
+    private Menu menu;
+    private InputReader inputReader;
+    private EventView eventView;
+    private UserView userView;
+    private ActionHistoryView actionHistoryView;
+    private boolean running;
+
+    public ConsoleApplication(EventView eventView,
+                              UserView userView,
+                              ActionHistoryView actionHistoryView,
+<span class="nc" id="L26">                              InputReader inputReader) {</span>
+<span class="nc" id="L27">        this.eventView = eventView;</span>
+<span class="nc" id="L28">        this.userView = userView;</span>
+<span class="nc" id="L29">        this.actionHistoryView = actionHistoryView;</span>
+<span class="nc" id="L30">        this.inputReader = inputReader;</span>
+<span class="nc" id="L31">        init();</span>
+<span class="nc" id="L32">    }</span>
+
+    private void init() {
+<span class="nc" id="L35">        this.menu = new Menu();</span>
+<span class="nc" id="L36">        menu.addItem(ADD_USER, &quot;Добавить сотрудника&quot;);</span>
+<span class="nc" id="L37">        menu.addItem(SHOW_USERS, &quot;Показать участников&quot;);</span>
+<span class="nc" id="L38">        menu.addItem(ADD_EVENT, &quot;Добавить мероприятие&quot;);</span>
+<span class="nc" id="L39">        menu.addItem(CANCEL_EVENT, &quot;Отменить мероприятие&quot;);</span>
+<span class="nc" id="L40">        menu.addItem(SHOW_EVENTS, &quot;Список мероприятий&quot;);</span>
+<span class="nc" id="L41">        menu.addItem(EVENT_DETAILS, &quot;Показать детали мероприятия&quot;);</span>
+<span class="nc" id="L42">        menu.addItem(REGISTER_MEMBER, &quot;Зарегистрировать участника&quot;);</span>
+<span class="nc" id="L43">        menu.addItem(UNREGISTER_MEMBER, &quot;Отменить регистрацию участника&quot;);</span>
+<span class="nc" id="L44">        menu.addItem(UNDO_ACTION, &quot;Отменить последнее действие&quot;);</span>
+<span class="nc" id="L45">        menu.addItem(EXIT, &quot;Выход&quot;);</span>
+<span class="nc" id="L46">    }</span>
+
+    public void run() {
+<span class="nc" id="L49">        this.running = true;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        while (running) {</span>
+<span class="nc" id="L51">            menu.show();</span>
+<span class="nc" id="L52">            handleChoice(inputReader.getInt(&quot;Выберите пожалуйста пункт меню: &quot;));</span>
+        }
+<span class="nc" id="L54">    }</span>
+
+    private void stop() {
+<span class="nc" id="L57">        this.running = false;</span>
+<span class="nc" id="L58">        System.out.println(&quot;До свидания!!!&quot;);</span>
+<span class="nc" id="L59">    }</span>
+
+    private void handleChoice(int choice) {
+<span class="nc bnc" id="L62" title="All 11 branches missed.">        switch (choice) {</span>
+<span class="nc" id="L63">            case ADD_USER -&gt; userView.createUserHandler();</span>
+<span class="nc" id="L64">            case SHOW_USERS -&gt; userView.showUsersHandler();</span>
+<span class="nc" id="L65">            case ADD_EVENT -&gt; eventView.createEventHandler();</span>
+<span class="nc" id="L66">            case CANCEL_EVENT -&gt; eventView.cancelEventHandler();</span>
+<span class="nc" id="L67">            case SHOW_EVENTS -&gt; eventView.showEventsHandler();</span>
+<span class="nc" id="L68">            case EVENT_DETAILS -&gt; eventView.showEventDetailsHandler();</span>
+<span class="nc" id="L69">            case REGISTER_MEMBER -&gt; eventView.registerMemberEventHandler();</span>
+<span class="nc" id="L70">            case UNREGISTER_MEMBER -&gt; eventView.unregisterMemberEventHandler();</span>
+<span class="nc" id="L71">            case UNDO_ACTION -&gt; actionHistoryView.undoActionHandler();</span>
+<span class="nc" id="L72">            case EXIT -&gt; stop();</span>
+<span class="nc" id="L73">            default -&gt; System.out.println(&quot;В меню нет такого пункта. Выберите из списка.&quot;);</span>
+        }
+<span class="nc" id="L75">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

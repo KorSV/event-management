@@ -33,6 +33,7 @@ class EventServiceTest {
     private EventService eventService;
     private UserService userService;
     private ActionHistoryService actionHistoryService;
+    private LocalDateTime validStart;
 
     @BeforeEach
     void init() {
@@ -40,8 +41,8 @@ class EventServiceTest {
         this.userRepository = new UserRepository();
         this.userService = new UserService(userRepository);
         this.actionHistoryService = new ActionHistoryService();
-
         this.eventService = new EventService(eventRepository, userService, actionHistoryService);
+        validStart = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0).withSecond(0).withNano(0);
 
     }
 
@@ -111,7 +112,7 @@ class EventServiceTest {
     @Test
     void createEvent_shouldAddEventToEventList() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         assertThat(eventService.getEvents()).containsExactly(event);
     }
@@ -120,7 +121,7 @@ class EventServiceTest {
     @Test
     void cancelEvent_shouldSetArchiveStatusToEvent() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         assertThat(eventService.cancelEvent(event.getId()).getStatus())
                 .isEqualTo(StatusEvent.ARCHIVE);
@@ -129,7 +130,7 @@ class EventServiceTest {
     @Test
     void cancelEvent_shouldThrow_whenEventAlreadyArchive() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         eventService.cancelEvent(event.getId());
         assertThatThrownBy(
@@ -142,7 +143,7 @@ class EventServiceTest {
     @Test
     void registerMember_shouldAddUserToEventMember() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         User user = userService.createUser("admin");
         eventService.registerMember(event.getId(), user.getId());
@@ -152,7 +153,7 @@ class EventServiceTest {
     @Test
     void registerMember_shouldThrow_whenEventIsArchive() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         eventService.cancelEvent(event.getId());
         User user = userService.createUser("admin");
@@ -165,7 +166,7 @@ class EventServiceTest {
     @Test
     void registerMember_shouldAddUserToWaitList_whenEventIsFull() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 5);
         for (int i = 0; i < 5; i++) {
             eventService.registerMember(event.getId(),
@@ -179,7 +180,7 @@ class EventServiceTest {
     @Test
     void registerMember_shouldThrow_whenUserAlreadyRegisterOnThisEvent() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         User user = userService.createUser("admin");
         eventService.registerMember(event.getId(), user.getId());
@@ -200,7 +201,7 @@ class EventServiceTest {
     @Test
     void unregisterMember_shouldThrow_whenUserDoesNotExist() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         assertThatThrownBy(() -> eventService.unregisterMember(event.getId(), 999))
                 .isInstanceOf(UserNotFoundException.class)
@@ -210,7 +211,7 @@ class EventServiceTest {
     @Test
     void unregisterMember_shouldThrow_whenUserNotRegisterOnThisEvent() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         User user = userService.createUser("user");
         assertThatThrownBy(() -> eventService.unregisterMember(event.getId(), user.getId()))
@@ -221,7 +222,7 @@ class EventServiceTest {
     @Test
     void unregisterMember_shouldRemoveUserFormEventMembers() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         User user = userService.createUser("user");
         User admin = userService.createUser("admin");
@@ -237,7 +238,7 @@ class EventServiceTest {
     @Test
     void getEventById_shouldReturnEvent_whenEventExist() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         assertThat(eventService.getEventById(event.getId()).getName())
                 .isEqualTo("test event");
@@ -253,7 +254,7 @@ class EventServiceTest {
     @Test
     void findEventById_shouldReturnEvent_whenEventExist() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         assertThat(eventService.findEventById(event.getId()))
                 .hasValueSatisfying(
@@ -268,7 +269,7 @@ class EventServiceTest {
     @Test
     void getStatusRegistration_shouldReturnNOT_REGISTERED_whenUserNotRegistred() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         User user = userService.createUser("user");
         assertThat(eventService.getStatusRegistration(event, user.getId()))
@@ -278,7 +279,7 @@ class EventServiceTest {
     @Test
     void getStatusRegistration_shouldReturnWAITLIST_whenUserInWaitList() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 5);
         for (int i = 0; i < 5; i++) {
             eventService.registerMember(event.getId(),
@@ -293,7 +294,7 @@ class EventServiceTest {
     @Test
     void getStatusRegistration_shouldReturnREGISTERED_whenUserIsRegistered() {
         Event event = eventService.createEvent("test event"
-                , LocalDateTime.now().plusDays(1)
+                , validStart
                 , 10);
         User user = userService.createUser("user");
         eventService.registerMember(event.getId(), user.getId());

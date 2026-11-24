@@ -141,7 +141,7 @@ class EventServiceTest {
     }
 
     @Test
-    void canselEvent_shouldThrow_whenEventNotExists(){
+    void canselEvent_shouldThrow_whenEventNotExists() {
         assertThatThrownBy( () -> eventService.getEventById(999))
                 .isInstanceOf(EventNotFoundException.class)
                         .hasMessageContaining("Мероприятие с id= 999 не существует.");
